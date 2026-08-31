@@ -299,9 +299,10 @@
       <div class="row"><label>اسم المستخدم</label><input type="text" id="sbUser" placeholder="mohsen"></div>
       <div class="row"><label>كلمة السر</label><input type="password" id="sbPass"></div>
       <div class="grid2">
-        <button class="act" id="sbLogin">🔑 دخول</button>
+        <button class="act" id="sbLogin" style="background:var(--accent);border-color:var(--accent);color:#fff">🔑 دخول</button>
         <button class="act" id="sbSignup">＋ حساب جديد</button>
       </div>
+      <button class="act btn-wide" id="sbTest">🔌 فحص الاتصال</button>
       <div class="hint" style="margin-top:6px">
         <span id="sbAdvT" style="cursor:pointer;text-decoration:underline">⚙ إعدادات الخادم</span>
       </div>
@@ -1668,6 +1669,41 @@ function sbLoad(){
     }
   }catch(e){}
 }
+/* فحص الاتصال: يخبرك بالضبط أين المشكلة */
+$('sbTest').onclick=function(){
+  var url=((($('sbUrl')&&$('sbUrl').value.trim()) || SB_DEF.url)||'').replace(/\/+$/,'');
+  var key=(($('sbKey')&&$('sbKey').value.trim()) || SB_DEF.key)||'';
+  if(!url || !key){ showInfo('غير مضبوط','لم يُضبط رابط الخادم أو مفتاحه.','⚠️'); return; }
+  toast('جارٍ الفحص…');
+  var ctl=new AbortController(), tmo=setTimeout(function(){ ctl.abort(); }, 12000);
+  fetch(url+'/rest/v1/', {headers:{'apikey':key}, signal:ctl.signal})
+    .then(function(r){
+      clearTimeout(tmo);
+      if(r.status===401 || r.status===403) throw new Error('KEYBAD');
+      return fetch(url+'/rest/v1/rpc/krooki_list', {
+        method:'POST',
+        headers:{'apikey':key,'Authorization':'Bearer '+key,'Content-Type':'application/json'},
+        body: JSON.stringify({p_user:'__test__', p_hash:'x', p_alt:'y'})
+      }).then(function(r2){
+        return r2.text().then(function(t){
+          if(r2.status===404 || /PGRST202|Could not find the function/i.test(t))
+            throw new Error('NOSQL');
+          showInfo('الاتصال سليم ✅',
+            'الخادم يستجيب ودوال كروكي مثبّتة. تستطيع تسجيل الدخول أو إنشاء حساب جديد الآن.', '✅');
+        });
+      });
+    })
+    .catch(function(e){
+      clearTimeout(tmo);
+      var m=String(e.message||e);
+      if(m==='KEYBAD') return showInfo('المفتاح مرفوض','خادم Supabase رفض المفتاح العام. تأكد أنه مفتاح anon public لهذا المشروع.','⚠️');
+      if(m==='NOSQL')  return showInfo('الخادم يستجيب — لكن الدوال ناقصة',
+        'الاتصال بالخادم ناجح، لكن دوال كروكي غير موجودة. افتح Supabase ← SQL Editor ← الصق ملف krooki-supabase.sql كاملاً ← Run.', '🧩');
+      showInfo('لا يصل إلى الخادم',
+        'لم يُفتح اتصال مع '+url+'\n\nالأسباب المحتملة:\n• مشروع Supabase متوقف مؤقتاً (الباقة المجانية توقفه بعد أسبوع خمول) — افتح لوحة التحكم واضغط Restore.\n• انقطاع الإنترنت أو حجب من الشبكة/جدار الحماية.\n\n(تفصيل تقني: '+m+')', '📡');
+    });
+};
+
 $('sbAdvT').onclick=function(){
   var d=$('sbAdv'); d.style.display=(d.style.display==='none')? '':'none';
 };
@@ -1714,12 +1750,25 @@ $('sbLogin').onclick=function(){
     sbSave(); sbShow(true); renderCloud(list||[]);
     toast('تم الدخول — مشاريعك السحابية جاهزة');
   }).catch(function(e){
-    var m=String(e.message||e);
-    if(/Could not find the function|PGRST202|does not exist/i.test(m))
-      m='لم يُجهَّز الخادم بعد: شغّل ملف krooki-supabase.sql مرة واحدة في SQL Editor داخل Supabase.';
-    else if(/دخول غير صحيحة|invalid|JWT|apikey/i.test(m)) m='اسم المستخدم أو كلمة السر غير صحيحة.';
-    else if(/Failed to fetch|NetworkError/i.test(m)) m='لا يوجد اتصال بالإنترنت أو الخادم متوقف.';
-    showInfo('تعذّر الدخول', m, '⚠️');
+    var m=String(e.message||e), t='تعذّر الدخول', ic='⚠️';
+    if(/اكتب اسم المستخدم/.test(m)){ t='أكمل البيانات'; ic='✏️'; }
+    else if(/Could not find the function|PGRST202|does not exist/i.test(m)){
+      t='الخادم غير مجهّز';
+      m='شغّل ملف krooki-supabase.sql مرة واحدة في SQL Editor داخل Supabase ثم أعد المحاولة.';
+    }
+    else if(/دخول غير صحيحة|invalid_grant/i.test(m)){
+      askConfirm('لا يوجد حساب بهذا الاسم',
+        'الاسم «'+$('sbUser').value.trim()+'» غير مسجّل، أو كلمة السر غير صحيحة. هل تريد إنشاء حساب جديد بهذا الاسم؟',
+        function(){ $('sbSignup').click(); },
+        {icon:'🔑', okText:'أنشئ حساباً', danger:false});
+      return;
+    }
+    else if(/JWT|apikey|Invalid API key/i.test(m)) m='مفتاح الخادم غير صالح أو منتهٍ.';
+    else if(/Failed to fetch|NetworkError|aborted/i.test(m)){
+      t='تعذّر الوصول للخادم';
+      m='لم يستجب خادم Supabase. اضغط «فحص الاتصال» لمعرفة السبب بالتفصيل.';
+    }
+    showInfo(t, m, ic);
   });
 };
 $('sbSignup').onclick=function(){
@@ -1727,15 +1776,24 @@ $('sbSignup').onclick=function(){
     return rpc('krooki_signup', {p_user:SB.user, p_hash:SB.hash, p_hint:''});
   }).then(function(){
     sbSave(); sbShow(true); renderCloud([]);
-    toast('تم إنشاء الحساب — سجّل به من أي جهاز');
+    showInfo('تم إنشاء حسابك ✅',
+      'الاسم: '+SB.user+'\nاحفظ اسمك وكلمة سرك — بهما تدخل من أي جهاز في العالم وتجد مشاريعك.', '🎉');
   }).catch(function(e){
-    var m=String(e.message||e);
-    if(/Could not find the function|PGRST202|does not exist/i.test(m))
-      m='لم يُجهَّز الخادم بعد: شغّل ملف krooki-supabase.sql مرة واحدة في SQL Editor داخل Supabase.';
-    else if(/موجود|exists|duplicate|unique/i.test(m))
+    var m=String(e.message||e), t='تعذّر إنشاء الحساب', ic='⚠️';
+    if(/اكتب اسم المستخدم/.test(m)){ t='أكمل البيانات'; ic='✏️'; }
+    else if(/Could not find the function|PGRST202|does not exist/i.test(m)){
+      t='الخادم غير مجهّز';
+      m='شغّل ملف krooki-supabase.sql مرة واحدة في SQL Editor داخل Supabase ثم أعد المحاولة.';
+    }
+    else if(/موجود|exists|duplicate|unique/i.test(m)){
+      t='الاسم غير متاح';
       m='هذا الاسم مستخدم بالفعل في أحد تطبيقاتك — اختر اسماً آخر.';
-    else if(/Failed to fetch|NetworkError/i.test(m)) m='لا يوجد اتصال بالإنترنت.';
-    showInfo('الاسم غير متاح', m, '⚠️');
+    }
+    else if(/Failed to fetch|NetworkError|aborted/i.test(m)){
+      t='تعذّر الوصول للخادم';
+      m='لم يستجب خادم Supabase. اضغط «فحص الاتصال» لمعرفة السبب بالتفصيل.';
+    }
+    showInfo(t, m, ic);
   });
 };
 $('sbOut2').onclick=function(){

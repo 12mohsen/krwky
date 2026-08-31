@@ -75,6 +75,24 @@
            border-radius:10px; margin-bottom:6px; background:var(--bg); flex-wrap:wrap}
   .projRow .acts{flex:1 1 100%; display:flex; gap:4px; justify-content:flex-start; margin-top:2px}
   .projRow.cur{border-color:var(--accent); box-shadow:0 0 0 2px var(--accent2)}
+  .projRow{position:relative}
+  .nmTip{
+    position:absolute; z-index:35; inset-inline-start:6px; inset-inline-end:6px;
+    bottom:calc(100% - 2px);
+    background:rgba(16,22,30,.86); color:#f3f7fb;
+    -webkit-backdrop-filter:blur(7px); backdrop-filter:blur(7px);
+    border:1px solid rgba(160,180,205,.28); border-radius:10px;
+    padding:7px 10px; font-size:12px; font-weight:600; line-height:1.6;
+    white-space:normal; overflow-wrap:anywhere;
+    box-shadow:0 10px 26px rgba(0,0,0,.34);
+    opacity:0; visibility:hidden; pointer-events:none;
+    transform:translateY(6px); transition:opacity .16s ease, transform .16s ease;
+  }
+  .nmTip.below{ bottom:auto; top:calc(100% - 2px); transform:translateY(-6px) }
+  .projRow:hover > .nmTip, .projRow.tipOn > .nmTip{
+    opacity:1; visibility:visible; transform:translateY(0);
+  }
+  .projInfo b{cursor:default}
   .projRow img{width:46px; height:32px; object-fit:cover; border-radius:6px; background:#fff; flex:0 0 auto}
   .projInfo{flex:1; min-width:0; display:flex; flex-direction:column; overflow:hidden}
   .projInfo b{font-size:12.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
@@ -1909,6 +1927,32 @@ document.addEventListener('keydown', function(e){
 }, true);
 
 /* ============================ مكتبة المشاريع (ذاكرة التطبيق) ============================ */
+/* اسم المشروع + تلميحة شفافة تُظهر الاسم كاملاً عند مرور الفأرة أو النقر على الجوال */
+function esc(t){ return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function nameCell(icon, name, sub){
+  var full=String(name==null? '':name);
+  var tip = full.length>16
+    ? '<span class="nmTip">'+esc(icon? icon+' '+full : full)+'</span>' : '';
+  return '<div class="projInfo"><b title="'+esc(full)+'">'+esc(icon? icon+' '+full : full)+'</b>'+
+         '<span>'+esc(sub)+'</span></div>'+tip;
+}
+/* على الجوال: نقرة على الاسم تُظهر التلميحة، ونقرة أخرى تُخفيها */
+function wireTips(container){
+  var el=$(container); if(!el) return;
+  Array.prototype.forEach.call(el.querySelectorAll('.projRow'), function(row, ri){
+    var tip=row.querySelector('.nmTip'); if(!tip) return;
+    if(ri===0) tip.classList.add('below');   /* أول صف: التلميحة للأسفل */
+    var nm=row.querySelector('.projInfo');
+    if(!nm) return;
+    nm.style.cursor='pointer';
+    nm.addEventListener('click', function(e){
+      e.stopPropagation();
+      var wasOn=row.classList.contains('tipOn');
+      Array.prototype.forEach.call(el.querySelectorAll('.projRow.tipOn'), function(r){ r.classList.remove('tipOn'); });
+      if(!wasOn) row.classList.add('tipOn');
+    });
+  });
+}
 var DBH=null, curProj=null, dirtyAt=0, lastSaved='';
 function idb(){
   return new Promise(function(res,rej){
@@ -2028,13 +2072,14 @@ function buildProjList(force){
       h+='<div class="projRow'+(r.id===curProj?' cur':'')+'" data-id="'+r.id+'">'+
          '<input type="checkbox" class="pSel">'+
          '<img src="'+r.thumb+'" alt="">'+
-         '<div class="projInfo"><b>'+String(r.name).replace(/</g,'&lt;')+'</b><span>'+dt+' — '+r.walls+' جدار</span></div>'+
+         nameCell('', r.name, dt+' — '+r.walls+' جدار')+
          '<div class="acts"><button class="pOpen" title="فتح">📂 فتح</button>'+
          '<button class="pHist" title="النسخ السابقة">🕘</button>'+
          '<button class="pDel" title="حذف">🗑</button></div></div>';
     });
     el.innerHTML=h;
     wireSel('projList','pSel','pjBar','pjAll','pjDel');
+    wireTips('projList');
     $('pjDel').onclick=function(){
       var ids=selIds('projList','pSel'); if(!ids.length) return;
       askConfirm('حذف من هذا الجهاز',
@@ -2056,12 +2101,12 @@ function buildProjList(force){
           mine.forEach(function(r,i){
             var d=new Date(r.ts);
             h+='<div class="projRow" data-k="'+r.key+'">'+(r.thumb?'<img src="'+r.thumb+'">':'')+
-               '<div class="projInfo"><b>🕘 '+String(r.name||'').replace(/</g,'&lt;')+'</b><span>'+
-               d.toLocaleString('ar-EG')+' — '+(r.walls||0)+' جدار</span></div>'+
+               nameCell('🕘', r.name||'', d.toLocaleString('ar-EG')+' — '+(r.walls||0)+' جدار')+
                '<div class="acts"><button class="hOpen" title="استعادة">📂 استعادة</button></div></div>';
           });
           h+='<button class="act btn-wide" id="histBack">↩ رجوع للقائمة</button>';
           el.innerHTML=h;
+          wireTips('projList');
           Array.prototype.forEach.call(el.querySelectorAll('.projRow'), function(r2){
             r2.querySelector('.hOpen').onclick=function(){
               var k=r2.dataset.k;
@@ -2437,13 +2482,14 @@ function renderCloud(list){
     h+='<div class="projRow'+(r.id===curProj?' cur':'')+'" data-id="'+r.id+'">'+
        '<input type="checkbox" class="cSel">'+
        (r.thumb? '<img src="'+r.thumb+'" alt="">':'')+
-       '<div class="projInfo"><b>☁️ '+String(r.name).replace(/</g,'&lt;')+'</b><span>'+dt+' — '+(r.walls||0)+' جدار</span></div>'+
+       nameCell('☁️', r.name, dt+' — '+(r.walls||0)+' جدار')+
        '<div class="acts"><button class="cOpen" title="فتح">📂 فتح</button>'+
        '<button class="cRen" title="إعادة تسمية">✏️</button>'+
        '<button class="cDel" title="حذف">🗑</button></div></div>';
   });
   el.innerHTML=h;
   wireSel('sbList','cSel','sbBar','sbAll','sbDel');
+  wireTips('sbList');
   $('sbDel').onclick=function(){
     var ids=selIds('sbList','cSel'); if(!ids.length) return;
     confirmPass('حذف من السحابة',

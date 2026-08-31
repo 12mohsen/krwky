@@ -38,6 +38,7 @@
   }
   button.tool:hover, button.act:hover{background:#f3f6fa}
   button.tool.on{background:var(--accent); border-color:var(--accent); color:#fff}
+  button.act.on{background:var(--accent); border-color:var(--accent); color:#fff}
   button.act.danger{color:var(--warn)}
   #main{flex:1; display:flex; min-height:0}
   #cvwrap{flex:1; position:relative; min-width:0}
@@ -204,7 +205,8 @@
   :root[data-theme="dark"] button.act{ background:#1b222b; color:var(--ink); border-color:var(--line); }
   :root[data-theme="dark"] button.tool:hover,
   :root[data-theme="dark"] button.act:hover{ background:#232d39; }
-  :root[data-theme="dark"] button.tool.on{ background:var(--accent); border-color:var(--accent); color:#0f1319; }
+  :root[data-theme="dark"] button.tool.on,
+  :root[data-theme="dark"] button.act.on{ background:var(--accent); border-color:var(--accent); color:#0f1319; }
   :root[data-theme="dark"] input[type=number],
   :root[data-theme="dark"] input[type=text],
   :root[data-theme="dark"] input[type=password],
@@ -221,7 +223,7 @@
   <button class="act" id="btnMenu" title="الأدوات والإعدادات" style="display:none">☰</button>
   <div class="brand">📐 كروكي <small>— مخططات معمارية بالأبعاد</small>
     <span id="verTag" style="font-size:10px;font-weight:700;color:var(--accent);
-      border:1px solid var(--accent);border-radius:6px;padding:1px 5px;margin-inline-start:6px">v3 · جوال</span>
+      border:1px solid var(--accent);border-radius:6px;padding:1px 5px;margin-inline-start:6px">v3.2 · متعدد</span>
   </div>
   <div class="sep"></div>
   <button class="tool on" data-tool="select" title="تحديد وتحريك (V)">↖ تحديد</button>
@@ -231,6 +233,7 @@
   <button class="tool" data-tool="window" title="نافذة (N)">🪟 نافذة</button>
   <button class="tool" data-tool="dim" title="خط قياس (M)">↔ قياس</button>
   <button class="tool" data-tool="text" title="نص (T)">🅣 نص</button>
+  <button class="act" id="bMulti" title="تحديد متعدد: انقر عدة عناصر لتحديدها معاً (على الكمبيوتر: Ctrl + نقر)">⛶ متعدد</button>
   <div class="sep"></div>
   <button class="act" id="bUndo" title="تراجع (Ctrl+Z)">↶ تراجع</button>
   <button class="act" id="bRedo" title="إعادة (Ctrl+Y)">↷ إعادة</button>
@@ -266,7 +269,7 @@
 
   <aside>
     <div class="hint" style="text-align:center;margin-bottom:8px">
-      كروكي — الإصدار 3.0 (يدعم الجوال واللمس)
+      كروكي — الإصدار 3.2 (تحديد متعدد • يدعم الجوال واللمس)
     </div>
     <h3>إعدادات الرسم</h3>
     <div class="row"><label>سمك الجدار</label><input type="text" inputmode="decimal" id="wt" value="0.20" step="0.05" min="0.05"><span class="hint">م</span></div>
@@ -404,8 +407,8 @@
     <div id="sbIn" style="display:none">
       <div class="hint" id="sbWho"></div>
       <div class="grid2">
-        <button class="act" id="sbPush" title="يرفع التعديلات إلى نفس المشروع في السحابة">⬆️ رفع/تحديث</button>
-        <button class="act" id="sbPushNew" title="يرفعه كمشروع مستقل جديد">🆕 رفع نسخة</button>
+        <button class="act" id="sbPush" title="يرفع التعديلات إلى نفس المشروع في السحابة — يسألك عن الاسم أولاً">⬆️ رفع/تحديث</button>
+        <button class="act" id="sbPushNew" title="يرفعه كمشروع مستقل جديد باسم تختاره">🆕 رفع نسخة باسم</button>
       </div>
       <div class="grid2">
         <button class="act" id="sbSync" title="يعيد جلب قائمة المشاريع من السحابة">🔄 تحديث القائمة</button>
@@ -465,6 +468,8 @@ var imgEl=null;
 var view = { ox:0, oy:0, ppm:70 };     // بكسل لكل متر
 var tool = 'select';
 var sel = null;                        // {t:'wall'|'op'|'text'|'dim', id}
+var msel = [];                         // التحديد المتعدد: [{t,id}]
+var multiMode = false;                 // وضع «متعدد» للمس/الجوال
 var draft = null;                      // حالة الرسم الجاري
 var undoStack = [], redoStack = [];
 var mouse = {x:0,y:0,sx:0,sy:0};
@@ -547,8 +552,8 @@ function toWorld(sx,sy){ return {x:(sx-view.ox)/view.ppm, y:(sy-view.oy)/view.pp
 /* ============================ التراجع ============================ */
 function snapshot(){ return JSON.stringify(doc); }
 function pushUndo(){ undoStack.push(snapshot()); if(undoStack.length>80) undoStack.shift(); redoStack.length=0; }
-function undo(){ if(!undoStack.length) return; redoStack.push(snapshot()); doc=JSON.parse(undoStack.pop()); sel=null; refresh(); }
-function redo(){ if(!redoStack.length) return; undoStack.push(snapshot()); doc=JSON.parse(redoStack.pop()); sel=null; refresh(); }
+function undo(){ if(!undoStack.length) return; redoStack.push(snapshot()); doc=JSON.parse(undoStack.pop()); sel=null; msel=[]; refresh(); }
+function redo(){ if(!redoStack.length) return; undoStack.push(snapshot()); doc=JSON.parse(redoStack.pop()); sel=null; msel=[]; refresh(); }
 
 /* ============================ التجاذب ============================ */
 function snapPoint(p, exclude){
@@ -654,7 +659,7 @@ function drawWalls(c,v){
       c.fillStyle=P('wallF'); c.fill();
       c.strokeStyle=P('wallS'); c.lineWidth=1.6*K(v); c.stroke();
     });
-    if(sel && sel.t==='wall' && sel.id===w.id){
+    if(selShow('wall', w.id)){
       polyPath(c, quad(w,0,wallGeom(w).L), v);
       c.strokeStyle=P('blue'); c.lineWidth=2.6*K(v); c.stroke();
     }
@@ -694,7 +699,7 @@ function drawOps(c,v){
       c.arc(Pc.x,Pc.y,R, Math.min(a0,a1), Math.max(a0,a1));
       c.strokeStyle=P('arc'); c.lineWidth=1.1*K(v); c.setLineDash([4*K(v),3*K(v)]); c.stroke(); c.setLineDash([]);
     }
-    if(sel && sel.t==='op' && sel.id===o.id){
+    if(selShow('op', o.id)){
       var m=ptOn(w,o.d), ms=toScr(m);
       c.beginPath(); c.arc(ms.x,ms.y,9,0,6.284); c.strokeStyle=P('blue'); c.lineWidth=2.4; c.stroke();
     }
@@ -754,7 +759,7 @@ function drawDims(c,v){
     var off=d.off||0.45;
     var A={x:d.a.x+g.n.x*off, y:d.a.y+g.n.y*off};
     var B={x:d.b.x+g.n.x*off, y:d.b.y+g.n.y*off};
-    c.strokeStyle= (sel&&sel.t==='dim'&&sel.id===d.id)?P('blue'):P('red');
+    c.strokeStyle= selShow('dim', d.id)?P('blue'):P('red');
     c.lineWidth=1.2*K(v);
     line(c,v,A,B);
     line(c,v,d.a,A); line(c,v,d.b,B);
@@ -766,7 +771,7 @@ function drawDims(c,v){
       line(c,v,p,p1); line(c,v,p,p2);
     });
     dimText(c,v,A,B, dimStr(g.L)+(($('unitMode').value==='mm')?'':' م'), P('red'), 4);
-    if(sel && sel.t==='dim' && sel.id===d.id){
+    if(sel && !EXPORTING && sel.t==='dim' && sel.id===d.id){
       [d.a, d.b, A, B].forEach(function(q, qi){
         var sq=toScrV(v,q);
         c.beginPath(); c.rect(sq.x-4.5, sq.y-4.5, 9, 9);
@@ -783,7 +788,7 @@ function drawTexts(c,v){
     c.font='700 '+Math.max(10,(t.s||0.28)*v.ppm)+'px Segoe UI, Tahoma, sans-serif';
     c.textAlign='center'; c.textBaseline='middle';
     c.fillStyle=P('txt'); c.fillText(t.txt, s.x, s.y);
-    if(sel && sel.t==='text' && sel.id===t.id){
+    if(selShow('text', t.id)){
       var w=c.measureText(t.txt).width;
       c.strokeStyle=P('blue'); c.lineWidth=1.6;
       c.strokeRect(s.x-w/2-5, s.y-12, w+10, 24);
@@ -946,27 +951,146 @@ function nameRoom(r, name){
     t.txt=name;
   } else {
     var sz=Math.max(0.20, Math.min(0.34, Math.sqrt(r.area)*0.075));
-    doc.texts.push({id:nid(), x:r.cx, y:r.cy-Math.min(0.3, Math.sqrt(r.area)*0.08), s:sz, txt:name});
+    var sp=labelSpot(r, detectRooms());
+    doc.texts.push({id:nid(), x:sp.x, y:sp.y-Math.min(0.3, Math.sqrt(r.area)*0.08), s:sz, txt:name});
   }
 }
 
 function drawRooms(c,v){
   if(!on('showArea')) return;
   var rooms=detectRooms();
+  var spots=roomSpots(rooms);
   var tot=0;
-  rooms.forEach(function(r){
-    tot+=r.areaIn;
-    var s=toScr({x:r.cx,y:r.cy});
-    c.font='600 '+(11.5*K(v)).toFixed(1)+'px Segoe UI, Tahoma, sans-serif';
-    c.textAlign='center'; c.textBaseline='top';
-    c.fillStyle=P('area');
-    c.fillText(fmt(r.areaIn)+' م²', s.x, s.y+9*K(v));
+  var occ=[];
+  /* نحجز مواضع أسماء الغرف أولاً حتى لا تتداخل معها أرقام المساحة */
+  c.save();
+  doc.texts.forEach(function(t){
+    var st=toScr(t), fs=Math.max(10,(t.s||0.28)*view.ppm);
+    c.font='700 '+fs+'px Segoe UI, Tahoma, sans-serif';
+    var tw=c.measureText(t.txt).width;
+    occ.push({x0:st.x-tw/2-3, y0:st.y-fs*0.7, x1:st.x+tw/2+3, y1:st.y+fs*0.7});
   });
+  c.restore();
+
+  var fsz=11.5*K(v);
+  c.font='600 '+fsz.toFixed(1)+'px Segoe UI, Tahoma, sans-serif';
+  c.textAlign='center'; c.textBaseline='top';
+  /* الغرف الصغيرة تُرسم أولاً: بطاقتها تبقى في مكانها والكبيرة هي التي تتنحّى */
+  var order=rooms.map(function(r,i){ return i; }).sort(function(a,b){
+    return rooms[a].area-rooms[b].area;
+  });
+  var place=[];
+  order.forEach(function(i){
+    var r=rooms[i], sp=spots[i]||{x:r.cx,y:r.cy};
+    var txt=fmt(r.areaIn)+' م²';
+    var tw=c.measureText(txt).width, th=fsz*1.25;
+    var s0=toScr(sp);
+    var bx=s0.x, by=s0.y+9*K(v);
+    var step=th+3*K(v), best=null, bestPen=1e18;
+    for(var k=0;k<14;k++){
+      /* 0 , +1 , -1 , +2 , -2 ... إزاحة رأسية داخل الغرفة */
+      var m=Math.ceil(k/2)*((k%2)?1:-1);
+      var y=by+m*step;
+      var rc={x0:bx-tw/2-3, y0:y-2, x1:bx+tw/2+3, y1:y+th+2};
+      var inside=inPoly(toWorld(bx,(rc.y0+rc.y1)/2), r.pts);
+      var pen=(inside?0:1000)+Math.abs(m)*2+ovArea(rc,occ)*0.02;
+      if(pen<bestPen){ bestPen=pen; best={rc:rc,y:y}; }
+      if(pen<=Math.abs(m)*2+0.001) break;
+    }
+    occ.push(best.rc);
+    place.push({r:r, txt:txt, x:bx, y:best.y});
+  });
+  place.forEach(function(o){
+    c.fillStyle=P('area');
+    c.fillText(o.txt, o.x, o.y);
+  });
+  rooms.forEach(function(r){ tot+=r.areaIn; });
   $('sarea').textContent=fmt(tot);
+}
+
+/* مساحة التداخل بين مستطيل ومجموعة مستطيلات (بالبكسل) */
+function ovArea(a, list){
+  var s=0;
+  for(var i=0;i<list.length;i++){
+    var b=list[i];
+    var w=Math.min(a.x1,b.x1)-Math.max(a.x0,b.x0);
+    var h=Math.min(a.y1,b.y1)-Math.max(a.y0,b.y0);
+    if(w>0&&h>0) s+=w*h;
+  }
+  return s;
+}
+
+/* أفضل نقطة داخل الغرفة لوضع بطاقة المساحة:
+   بعيدة عن الجدران وعن أي غرفة أصغر بداخلها */
+var spotCache={key:'', val:null};
+function roomSpots(rooms){
+  if(spotCache.key===roomCache.key && spotCache.val && spotCache.val.length===rooms.length)
+    return spotCache.val;
+  var res=rooms.map(function(r){ return labelSpot(r, rooms); });
+  spotCache.key=roomCache.key; spotCache.val=res;
+  return res;
+}
+function polyClear(p, pts){
+  var d=1e9;
+  for(var i=0,j=pts.length-1;i<pts.length;j=i++)
+    d=Math.min(d, distSeg(p, pts[j], pts[i]).d);
+  return d;
+}
+function labelSpot(r, rooms){
+  var c0={x:r.cx, y:r.cy};
+  var inner=[];
+  rooms.forEach(function(o){
+    if(o===r || o.area>=r.area) return;
+    if(inPoly({x:o.cx,y:o.cy}, r.pts)) inner.push(o);
+  });
+  if(!inner.length) return c0;
+  /* هل مركز الغرفة الكبيرة واقع داخل غرفة أصغر أو ملاصق لها؟ */
+  var clash=false;
+  inner.forEach(function(o){
+    if(inPoly(c0,o.pts) || polyClear(c0,o.pts)<0.55) clash=true;
+  });
+  if(!clash) return c0;
+  var N=34, best=null, bestSc=-1;
+  for(var iy=1; iy<N; iy++) for(var ix=1; ix<N; ix++){
+    var p={x:r.x0+(r.x1-r.x0)*ix/N, y:r.y0+(r.y1-r.y0)*iy/N};
+    if(!inPoly(p, r.pts)) continue;
+    var bad=false, cl=polyClear(p, r.pts);
+    for(var q=0;q<inner.length;q++){
+      if(inPoly(p, inner[q].pts)){ bad=true; break; }
+      cl=Math.min(cl, polyClear(p, inner[q].pts));
+    }
+    if(bad) continue;
+    if(cl>bestSc){ bestSc=cl; best=p; }
+  }
+  if(!best) return c0;
+  /* من بين المواضع الفسيحة نختار الأقرب لمركز الغرفة */
+  var lim=bestSc*0.8, pick=best, pd=1e9;
+  for(iy=1; iy<N; iy++) for(ix=1; ix<N; ix++){
+    var p2={x:r.x0+(r.x1-r.x0)*ix/N, y:r.y0+(r.y1-r.y0)*iy/N};
+    if(!inPoly(p2, r.pts)) continue;
+    var bad2=false, cl2=polyClear(p2, r.pts);
+    for(var q2=0;q2<inner.length;q2++){
+      if(inPoly(p2, inner[q2].pts)){ bad2=true; break; }
+      cl2=Math.min(cl2, polyClear(p2, inner[q2].pts));
+    }
+    if(bad2 || cl2<lim) continue;
+    var d2=Math.hypot(p2.x-r.cx, p2.y-r.cy);
+    if(d2<pd){ pd=d2; pick=p2; }
+  }
+  return pick;
 }
 
 function drawDraft(c,v){
   if(!draft) return;
+  if(draft.k==='box'){
+    var A=toScrV(v,draft.a), B=toScrV(v,draft.cur);
+    var x=Math.min(A.x,B.x), y=Math.min(A.y,B.y);
+    var w=Math.abs(B.x-A.x), h=Math.abs(B.y-A.y);
+    c.fillStyle='rgba(77,157,255,.14)'; c.fillRect(x,y,w,h);
+    c.strokeStyle=P('blue'); c.lineWidth=1.4; c.setLineDash([6,4]);
+    c.strokeRect(x,y,w,h); c.setLineDash([]);
+    return;
+  }
   if(draft.k==='wall'){
     var a=draft.pts[draft.pts.length-1];
     var b=draft.cur;
@@ -1077,6 +1201,98 @@ function imgHit(p){
   return Math.abs(rx)<=im.w/2 && Math.abs(ry)<=im.h/2;
 }
 
+/* ============================ التحديد المتعدد ============================ */
+function mselHas(t,id){
+  for(var i=0;i<msel.length;i++) if(msel[i].t===t && msel[i].id===id) return true;
+  return false;
+}
+function mselAdd(h){ if(h && !mselHas(h.t,h.id)) msel.push({t:h.t, id:h.id}); }
+function mselOff(h){ msel=msel.filter(function(x){ return !(x.t===h.t && x.id===h.id); }); }
+function mselSet(h){ msel = h? [{t:h.t, id:h.id}] : []; }
+function mselClear(){ msel=[]; sel=null; }
+/* هل نُظهر إطار التحديد على هذا العنصر؟ (لا يظهر في التصدير) */
+function selShow(t,id){
+  if(EXPORTING) return false;
+  return (sel && sel.t===t && sel.id===id) || mselHas(t,id);
+}
+function arCount(n, one, two, few, many){
+  if(n===1) return one;
+  if(n===2) return two;
+  if(n<=10) return n+' '+few;
+  return n+' '+many;
+}
+function mselCounts(){
+  var c={wall:0, op:0, text:0, dim:0};
+  msel.forEach(function(x){ if(c[x.t]!==undefined) c[x.t]++; });
+  var a=[];
+  if(c.wall) a.push(arCount(c.wall,'جدار واحد','جداران','جدران','جداراً'));
+  if(c.op)   a.push(arCount(c.op,'فتحة واحدة','فتحتان','فتحات','فتحة'));
+  if(c.text) a.push(arCount(c.text,'نص واحد','نصّان','نصوص','نصاً'));
+  if(c.dim)  a.push(arCount(c.dim,'خط قياس','خطا قياس','خطوط قياس','خط قياس'));
+  return a.join(' + ');
+}
+function mselWord(){ return arCount(msel.length,'عنصر واحد','عنصرين','عناصر','عنصراً'); }
+/* تحديد كل شيء */
+function selectAll(){
+  msel=[];
+  doc.walls.forEach(function(w){ msel.push({t:'wall', id:w.id}); });
+  doc.texts.forEach(function(t){ msel.push({t:'text', id:t.id}); });
+  doc.dims.forEach(function(d){ msel.push({t:'dim', id:d.id}); });
+  sel = msel.length? msel[0] : null;
+  refresh();
+  if(msel.length) toast('تم تحديد الكل: '+mselCounts());
+}
+/* بدء سحب مجموعة محددة */
+function groupDrag(p){
+  var items=[];
+  msel.forEach(function(sx){
+    if(sx.t==='wall'){
+      var w=wallById(sx.id);
+      if(w) items.push({k:'seg', o:w, a:{x:w.a.x,y:w.a.y}, b:{x:w.b.x,y:w.b.y}});
+    } else if(sx.t==='dim'){
+      var d=doc.dims.filter(function(x){ return x.id===sx.id; })[0];
+      if(d) items.push({k:'seg', o:d, a:{x:d.a.x,y:d.a.y}, b:{x:d.b.x,y:d.b.y}});
+    } else if(sx.t==='text'){
+      var t=doc.texts.filter(function(x){ return x.id===sx.id; })[0];
+      if(t) items.push({k:'pt', o:t, x:t.x, y:t.y});
+    }
+    /* الأبواب والنوافذ تتحرك مع جدرانها تلقائياً */
+  });
+  return {m:'group', p:p, items:items};
+}
+/* هل يقطع المقطع مستطيل التحديد؟ */
+function segRect(a,b,R){
+  var inA = a.x>=R.x0 && a.x<=R.x1 && a.y>=R.y0 && a.y<=R.y1;
+  var inB = b.x>=R.x0 && b.x<=R.x1 && b.y>=R.y0 && b.y<=R.y1;
+  if(inA || inB) return true;
+  function cross(p1,p2,p3,p4){
+    function d(ax,ay,bx,by,cx,cy){ return (bx-ax)*(cy-ay)-(by-ay)*(cx-ax); }
+    var d1=d(p3.x,p3.y,p4.x,p4.y,p1.x,p1.y), d2=d(p3.x,p3.y,p4.x,p4.y,p2.x,p2.y);
+    var d3=d(p1.x,p1.y,p2.x,p2.y,p3.x,p3.y), d4=d(p1.x,p1.y,p2.x,p2.y,p4.x,p4.y);
+    return ((d1>0&&d2<0)||(d1<0&&d2>0)) && ((d3>0&&d4<0)||(d3<0&&d4>0));
+  }
+  var c1={x:R.x0,y:R.y0}, c2={x:R.x1,y:R.y0}, c3={x:R.x1,y:R.y1}, c4={x:R.x0,y:R.y1};
+  return cross(a,b,c1,c2)||cross(a,b,c2,c3)||cross(a,b,c3,c4)||cross(a,b,c4,c1);
+}
+/* تحديد كل ما يقع داخل مستطيل السحب */
+function selectInBox(A,B,addTo){
+  var R={x0:Math.min(A.x,B.x), y0:Math.min(A.y,B.y), x1:Math.max(A.x,B.x), y1:Math.max(A.y,B.y)};
+  if(!addTo) msel=[];
+  doc.walls.forEach(function(w){ if(segRect(w.a,w.b,R)) mselAdd({t:'wall', id:w.id}); });
+  doc.dims.forEach(function(d){ if(segRect(d.a,d.b,R)) mselAdd({t:'dim', id:d.id}); });
+  doc.texts.forEach(function(t){
+    if(t.x>=R.x0 && t.x<=R.x1 && t.y>=R.y0 && t.y<=R.y1) mselAdd({t:'text', id:t.id});
+  });
+  doc.ops.forEach(function(o){
+    if(mselHas('wall', o.w)) return;               /* الفتحة تتبع جدارها */
+    var w=wallById(o.w); if(!w) return;
+    var m=ptOn(w,o.d);
+    if(m.x>=R.x0 && m.x<=R.x1 && m.y>=R.y0 && m.y<=R.y1) mselAdd({t:'op', id:o.id});
+  });
+  sel = msel.length? msel[msel.length-1] : null;
+  if(msel.length>1) toast('محدد: '+mselCounts()+' — اسحب أحدها لنقلها كلها، أو Delete للحذف');
+}
+
 /* ============================ اختبار الإصابة ============================ */
 function hitTest(p){
   var tol=10/view.ppm;
@@ -1143,12 +1359,34 @@ cv.addEventListener('pointerdown', function(e){
 
   if(tool==='select'){
     var h=hitTest(p);
+    var addSel = (e.ctrlKey || e.metaKey || multiMode);
+
+    if(addSel){                       /* Ctrl + نقر (أو وضع «متعدد») = إضافة/إزالة */
+      if(h){
+        if(mselHas(h.t,h.id)){ mselOff(h); sel = msel.length? msel[msel.length-1] : null; }
+        else { mselAdd(h); sel={t:h.t, id:h.id}; }
+        if(msel.length>1) toast('محدد: '+mselCounts());
+      } else {
+        draft={k:'box', a:p, cur:p, add:true};      /* سحب مستطيل يضيف للتحديد */
+      }
+      refresh(); return;
+    }
+
     if(!h && doc.img && !on('imgLock') && imgHit(p)){
-      pushUndo(); sel=null;
+      pushUndo(); mselClear();
       dragging={m:'img', p:p, ix:doc.img.x, iy:doc.img.y};
       refresh(); return;
     }
-    sel=h;
+    if(!h){                           /* سحب على الفراغ = تحديد بمستطيل */
+      mselClear(); draft={k:'box', a:p, cur:p, add:false};
+      refresh(); return;
+    }
+    if(msel.length>1 && mselHas(h.t,h.id)){        /* سحب المجموعة كاملة */
+      pushUndo(); sel={t:h.t, id:h.id};
+      dragging=groupDrag(p);
+      refresh(); return;
+    }
+    sel=h; mselSet(h);
     if(h){
       pushUndo();
       if(h.t==='wall'){
@@ -1260,6 +1498,17 @@ cv.addEventListener('pointermove', function(e){
         var r=distSeg(p,w3.a,w3.b), L=wallGeom(w3).L;
         o.d=Math.max(o.width/2, Math.min(L-o.width/2, r.t*L));
       }
+    } else if(dragging.m==='group'){
+      var gdx=p.x-dragging.p.x, gdy=p.y-dragging.p.y;
+      var gg2=pnum($('gs').value)||0.25;
+      if(on('snap')){ gdx=Math.round(gdx/gg2)*gg2; gdy=Math.round(gdy/gg2)*gg2; }
+      dragging.items.forEach(function(it){
+        if(it.k==='seg'){
+          it.o.a={x:it.a.x+gdx, y:it.a.y+gdy};
+          it.o.b={x:it.b.x+gdx, y:it.b.y+gdy};
+        } else { it.o.x=it.x+gdx; it.o.y=it.y+gdy; }
+      });
+      roomCache.key='';
     } else if(dragging.m==='img'){
       doc.img.x=dragging.ix+(p.x-dragging.p.x);
       doc.img.y=dragging.iy+(p.y-dragging.p.y);
@@ -1286,6 +1535,7 @@ cv.addEventListener('pointermove', function(e){
     refresh(); return;
   }
   if(draft){
+    if(draft.k==='box'){ draft.cur=p; render(); return; }
     var s2=snapPoint(p);
     if(draft.k==='wall') draft.cur=applyOrtho(draft.pts[draft.pts.length-1], s2);
     else if(draft.k==='cal') draft.cur=p;
@@ -1306,6 +1556,12 @@ cv.addEventListener('pointerup', function(e){
   if(wasPinch){ dragging=null; return; }
   if(panning){ panning=null; return; }
   if(dragging){ dragging=null; return; }
+  if(draft && draft.k==='box'){
+    var A=draft.a, B=draft.cur, wasAdd=draft.add;
+    draft=null;
+    if(Math.abs(B.x-A.x)>0.12 && Math.abs(B.y-A.y)>0.12) selectInBox(A,B,wasAdd);
+    refresh(); return;
+  }
   if(draft && draft.k==='room'){
     var p=draft.a, q=draft.cur;
     var w=Math.abs(q.x-p.x), h=Math.abs(q.y-p.y);
@@ -1383,7 +1639,8 @@ document.addEventListener('keydown', function(e){
 
   if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='z'){ e.preventDefault(); undo(); return; }
   if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='y'){ e.preventDefault(); redo(); return; }
-  if(e.key==='Escape'){ draft=null; hideLenBox(); sel=null; refresh(); return; }
+  if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='a'){ e.preventDefault(); selectAll(); return; }
+  if(e.key==='Escape'){ draft=null; hideLenBox(); mselClear(); refresh(); return; }
   if(e.key==='Delete'||e.key==='Backspace'){ delSel(); return; }
   if(draft && /^[0-9.]$/.test(e.key)){ showLenBox(); lenIn.value=e.key; e.preventDefault(); return; }
   var map={v:'select', w:'wall', r:'room', d:'door', n:'window', m:'dim', t:'text'};
@@ -1406,17 +1663,31 @@ Array.prototype.forEach.call(document.querySelectorAll('button.tool'), function(
 });
 
 function delSel(){
-  if(!sel) return;
+  var list = msel.length? msel.slice() : (sel? [{t:sel.t, id:sel.id}] : []);
+  if(!list.length){ toast('حدّد عنصراً أولاً — أو اسحب مستطيلاً حول عدة عناصر'); return; }
   pushUndo();
-  if(sel.t==='wall'){
-    doc.walls=doc.walls.filter(function(w){return w.id!==sel.id;});
-    doc.ops=doc.ops.filter(function(o){return o.w!==sel.id;});
-  }
-  if(sel.t==='op') doc.ops=doc.ops.filter(function(o){return o.id!==sel.id;});
-  if(sel.t==='text') doc.texts=doc.texts.filter(function(t){return t.id!==sel.id;});
-  if(sel.t==='dim') doc.dims=doc.dims.filter(function(d){return d.id!==sel.id;});
-  sel=null; refresh();
+  var W={}, O={}, T={}, D={};
+  list.forEach(function(x){
+    if(x.t==='wall') W[x.id]=1;
+    else if(x.t==='op') O[x.id]=1;
+    else if(x.t==='text') T[x.id]=1;
+    else if(x.t==='dim') D[x.id]=1;
+  });
+  doc.walls=doc.walls.filter(function(w){ return !W[w.id]; });
+  doc.ops  =doc.ops.filter(function(o){ return !O[o.id] && !W[o.w]; });
+  doc.texts=doc.texts.filter(function(t){ return !T[t.id]; });
+  doc.dims =doc.dims.filter(function(d){ return !D[d.id]; });
+  var n=list.length;
+  sel=null; msel=[]; roomCache.key=''; roomListKey=''; refresh();
+  if(n>1) toast('تم حذف '+arCount(n,'عنصر','عنصرين','عناصر','عنصراً'));
 }
+$('bMulti').onclick=function(){
+  multiMode=!multiMode;
+  $('bMulti').classList.toggle('on', multiMode);
+  if(multiMode){ setTool('select'); toast('وضع التحديد المتعدد: انقر العناصر واحداً تلو الآخر ثم احذف أو اسحب'); }
+  else toast('تم إيقاف التحديد المتعدد');
+  refresh();
+};
 $('bDel').onclick=delSel;
 $('bUndo').onclick=undo;
 $('bRedo').onclick=redo;
@@ -1425,7 +1696,7 @@ $('bClear').onclick=function(){
     function(){
       pushUndo();
       doc={walls:[],ops:[],texts:[],dims:[],north:0,rot:0,img:null,seq:1};
-      $('northA').value=0; $('rotA').value=0; imgEl=null; sel=null; refresh();
+      $('northA').value=0; $('rotA').value=0; imgEl=null; sel=null; msel=[]; refresh();
       toast('تم مسح المخطط');
     }, {icon:'🗑', okText:'نعم، امسح'});
 };
@@ -1492,7 +1763,19 @@ function liveField(id, apply){
 function buildProps(){
   buildRoomList();
   var el=$('props');
-  if(!sel){ el.innerHTML='<div class="hint">لم يتم تحديد أي عنصر. استخدم أداة «تحديد» واضغط على جدار أو باب أو نص.</div>'; return; }
+  if(msel.length>1){
+    el.innerHTML='<div class="hint">✅ محدد الآن: <b>'+mselWord()+'</b> — '+mselCounts()+
+      '</div><div class="hint">اسحب أي عنصر منها لنقلها كلها معاً.</div>'+
+      '<button class="act btn-wide danger" id="pmDel">🗑 حذف المحدد ('+msel.length+')</button>'+
+      '<button class="act btn-wide" id="pmAll">⬚ تحديد الكل</button>'+
+      '<button class="act btn-wide" id="pmNone">✖ إلغاء التحديد</button>';
+    $('pmDel').onclick=delSel;
+    $('pmAll').onclick=selectAll;
+    $('pmNone').onclick=function(){ mselClear(); refresh(); };
+    return;
+  }
+  if(!sel){ el.innerHTML='<div class="hint">لم يتم تحديد أي عنصر. استخدم أداة «تحديد» واضغط على جدار أو باب أو نص.'+
+      '<br>لتحديد أكثر من عنصر: <b>Ctrl + نقر</b>، أو اسحب مستطيلاً على الفراغ، أو فعّل زر «⛶ متعدد».</div>'; return; }
   var html='';
   if(sel.t==='wall'){
     var w=wallById(sel.id); if(!w){ sel=null; return buildProps(); }
@@ -1602,7 +1885,7 @@ function askText(title, msg, value, cb, opt){
   opt=opt||{};
   openDialog({icon:opt.icon||'✏️', tone:opt.tone||'', title:title, msg:msg, input:true,
     value:value, placeholder:opt.placeholder||'', numeric:!!opt.numeric,
-    password:!!opt.password, danger:!!opt.danger,
+    password:!!opt.password, danger:!!opt.danger, okText:opt.okText,
     cb:function(v){ if(v!==null) cb(v); }});
 }
 function showInfo(title, msg, icon){
@@ -1723,7 +2006,7 @@ function loadProject(rec){
     if(doc.img){ $('imgW').value=fmt(doc.img.w); $('imgA').value=doc.img.alpha||55; }
     loadImageObj(); updateFace();
     curProj=rec.id; lastSaved=rec.data; roomListKey='';
-    sel=null; fitView(); buildProps();
+    sel=null; msel=[]; fitView(); buildProps();
     toast('تم فتح: '+(d.name||rec.name));
   }catch(e){ showInfo('تعذّر الفتح','هذا المشروع تالف أو بصيغة غير مدعومة.','⚠️'); }
 }
@@ -2095,23 +2378,56 @@ function cloudPush(id, name){
       return rpc('krooki_list', {p_user:SB.user, p_hash:SB.hash, p_alt:SB.alt}); })
     .then(function(l){ renderCloud(l||[]); });
 }
+/* اسم غير مكرّر في القائمة السحابية */
+function uniqueCloudName(nm){
+  var used={};
+  cloudList.forEach(function(r){ used[String(r.name||'').trim()]=1; });
+  if(!used[nm]) return nm;
+  for(var i=2;i<200;i++){ var t=nm+' '+i; if(!used[t]) return t; }
+  return nm+' '+Date.now();
+}
+/* حوار التسمية ثم الرفع */
+function pushNamed(o){
+  askText(o.title, o.msg, o.name, function(v){
+    v=String(v==null? '':v).trim();
+    if(!v){ toast('اكتب اسماً للمشروع'); return; }
+    $('pname').value=v;
+    toast('جارٍ الرفع…');
+    cloudPush(o.id, v)
+      .then(function(){ toast(o.done+' «'+v+'»'); })
+      .catch(function(e){ showInfo('تعذّر الرفع', String(e.message||e), '⚠️'); });
+  }, {icon:'☁️', placeholder:'مثال: فيلا الرياض — الدور الأرضي', okText:o.okText});
+}
 $('sbPushNew').onclick=function(){
-  var nm=($('pname').value||'مخطط')+' — نسخة';
-  toast('جارٍ الرفع…');
-  cloudPush('p'+Date.now(), nm)
-    .then(function(){ toast('تم رفع نسخة مستقلة'); })
-    .catch(function(e){ showInfo('تعذّر الرفع', String(e.message||e), '⚠️'); });
+  var base=($('pname').value||'مخطط').trim()
+             .replace(/(\s*—\s*نسخة(\s*\d+)?)+$/,'').trim() || 'مخطط';
+  pushNamed({
+    id:'p'+Date.now(),
+    name: uniqueCloudName(base+' — نسخة'),
+    title:'اسم النسخة الجديدة',
+    msg:'اكتب الاسم الذي تريده لهذه النسخة. سترفع كمشروع مستقل ولن تُغيّر شيئاً مما في السحابة.',
+    okText:'🆕 رفع النسخة',
+    done:'تم رفع نسخة باسم'
+  });
 };
 $('sbPush').onclick=function(){
-  var nm=$('pname').value||'مخطط';
   var upd=!!(curProj && curProj!=='auto');
-  toast('جارٍ الرفع…');
-  cloudPush(upd? curProj : ('p'+Date.now()), nm)
-    .then(function(){ toast(upd? 'تم تحديث «'+nm+'» في السحابة' : 'تم رفع «'+nm+'» إلى السحابة'); })
-    .catch(function(e){ showInfo('تعذّر الرفع', String(e.message||e), '⚠️'); });
+  var nm=($('pname').value||'مخطط').trim();
+  pushNamed({
+    id: upd? curProj : ('p'+Date.now()),
+    name: upd? nm : uniqueCloudName(nm),
+    title: upd? 'تحديث المشروع في السحابة' : 'اسم المشروع قبل الرفع',
+    msg: upd? 'يمكنك تعديل الاسم قبل التحديث — سيُستبدل محتوى هذا المشروع نفسه في السحابة.'
+            : 'اكتب اسم المشروع كما تريده أن يظهر في قائمتك السحابية.',
+    okText: upd? '⬆️ تحديث' : '⬆️ رفع',
+    done: upd? 'تم تحديث' : 'تم رفع'
+  });
 };
+var cloudList=[], cloudById={};
 function renderCloud(list){
   var el=$('sbList');
+  cloudList=list||[]; cloudById={};
+  cloudList.forEach(function(r){ cloudById[r.id]=r; });
   if(!list.length){ el.innerHTML='<div class="hint">لا توجد مشاريع في السحابة بعد.</div>'; if($('sbBar')) $('sbBar').style.display='none'; return; }
   var h='';
   list.forEach(function(r){
@@ -2123,6 +2439,7 @@ function renderCloud(list){
        (r.thumb? '<img src="'+r.thumb+'" alt="">':'')+
        '<div class="projInfo"><b>☁️ '+String(r.name).replace(/</g,'&lt;')+'</b><span>'+dt+' — '+(r.walls||0)+' جدار</span></div>'+
        '<div class="acts"><button class="cOpen" title="فتح">📂 فتح</button>'+
+       '<button class="cRen" title="إعادة تسمية">✏️</button>'+
        '<button class="cDel" title="حذف">🗑</button></div></div>';
   });
   el.innerHTML=h;
@@ -2144,12 +2461,41 @@ function renderCloud(list){
         })
         .catch(function(e){ showInfo('تعذّر الفتح', String(e.message||e), '⚠️'); });
     };
+    row.querySelector('.cRen').onclick=function(){ renameCloud(id); };
     row.querySelector('.cDel').onclick=function(){
       confirmPass('حذف من السحابة',
         'سيُحذف هذا المشروع نهائياً من حسابك السحابي ومن هذا الجهاز — في كل أجهزتك.',
         function(){ deleteCloudIds([id]); });
     };
   });
+}
+
+/* إعادة تسمية مشروع في السحابة (بدون تغيير محتواه) */
+function renameCloud(id){
+  var r=cloudById[id]; if(!r) return;
+  var cur=String(r.name||'مخطط');
+  askText('إعادة تسمية المشروع', 'الاسم الحالي: '+cur+'\nاكتب الاسم الجديد كما تريده أن يظهر في قائمتك السحابية.',
+    cur, function(v){
+      v=String(v==null? '':v).trim();
+      if(!v || v===cur) return;
+      toast('جارٍ تغيير الاسم…');
+      rpc('krooki_get', {p_user:SB.user, p_hash:SB.hash, p_alt:SB.alt, p_id:id})
+        .then(function(data){
+          return rpc('krooki_save', {p_user:SB.user, p_hash:SB.hash, p_alt:SB.alt,
+            p_id:id, p_name:v, p_walls:(r.walls||0), p_thumb:r.thumb||null, p_data:data});
+        })
+        .then(function(){
+          if(curProj===id) $('pname').value=v;
+          return idbRun('readwrite', function(st){       /* والنسخة المحلية أيضاً */
+            var g=st.get(id);
+            g.onsuccess=function(){ var rec=g.result; if(rec){ rec.name=v; st.put(rec); } };
+          }).catch(function(){});
+        })
+        .then(function(){ projListKey=''; buildProjList(true);
+          return rpc('krooki_list', {p_user:SB.user, p_hash:SB.hash, p_alt:SB.alt}); })
+        .then(function(l){ renderCloud(l||[]); toast('تم تغيير الاسم إلى «'+v+'»'); })
+        .catch(function(e){ showInfo('تعذّر تغيير الاسم', String(e.message||e), '⚠️'); });
+    }, {icon:'✏️', placeholder:'اسم جديد', okText:'حفظ الاسم'});
 }
 
 /* ============================ التحديد والحذف الجماعي ============================ */
@@ -2277,7 +2623,7 @@ function transformPlan(fn, mirrored, dRad){
     doc.img.x=ct.x-doc.img.w/2; doc.img.y=ct.y-doc.img.h/2;
     if(dRad) doc.img.a=(doc.img.a||0)+dRad;
   }
-  sel=null; roomCache.key='';
+  sel=null; msel=[]; roomCache.key='';
   fitView(); buildProps();
 }
 function rotateBy(deg){              /* موجب = مع عقارب الساعة */
@@ -2744,7 +3090,7 @@ function generatePlan(){
   doc.dims.push({id:nid(), a:{x:W,y:0}, b:{x:W,y:H}, off:-1.3});
 
   $('pname').value='مخطط '+fmt(W)+' × '+fmt(H)+' م';
-  sel=null; fitView(); buildProps();
+  sel=null; msel=[]; fitView(); buildProps();
   toast('تم توليد المخطط — عدّل أي عنصر بأداة «تحديد»');
 }
 $('bGen').onclick=function(){ pushUndo(); generatePlan(); };
@@ -3108,7 +3454,7 @@ function vectorizeRun(){
   $('imgA').value=im.alpha;
   $('imgLock').checked=true;
   $('imgHideExp').checked=!on('vKeep');
-  sel=null; refresh();
+  sel=null; msel=[]; refresh();
   var rooms=detectRooms().length;
   window.__vecMs=Date.now()-t0;
   toast('تم استخراج '+doc.walls.length+' جداراً و'+nOp+' فتحة و'+rooms+' غرفة');
@@ -3161,7 +3507,7 @@ $('bTidy').onclick=function(){
   /* الفتحات التي فقدت جدارها تُحذف */
   var ids={}; doc.walls.forEach(function(w){ ids[w.id]=1; });
   doc.ops=doc.ops.filter(function(o){ return ids[o.w]; });
-  roomCache.key=''; sel=null; refresh();
+  roomCache.key=''; sel=null; msel=[]; refresh();
   toast('تم التنظيف: '+before+' ← '+doc.walls.length+' جداراً');
 };
 
@@ -3449,7 +3795,7 @@ function openProjectFile(f){
       if(doc.img){ $('imgW').value=fmt(doc.img.w); $('imgA').value=doc.img.alpha||55; }
       loadImageObj(); updateFace();
       if($('pname')&&d.name) $('pname').value=d.name;
-      sel=null; fitView(); buildProps(); toast('تم فتح المشروع');
+      sel=null; msel=[]; fitView(); buildProps(); toast('تم فتح المشروع');
     }catch(err){ showInfo('تعذّر فتح الملف', 'هذا الملف ليس مشروع كروكي صالحاً. اختر ملفاً بامتداد ‎.krk‎ سبق حفظه من التطبيق.', '⚠️'); }
   };
   r.readAsText(f);
@@ -3495,7 +3841,7 @@ function sample(){
   doc.dims.push({id:nid(), a:{x:0,y:0}, b:{x:12,y:0}, off:-1.1});
   doc.dims.push({id:nid(), a:{x:12,y:0}, b:{x:12,y:9}, off:-1.1});
   $('pname').value='مخطط منزل — دور أرضي';
-  sel=null; fitView(); buildProps();
+  sel=null; msel=[]; fitView(); buildProps();
 }
 $('bSample').onclick=function(){ pushUndo(); sample(); toast('تم تحميل مثال المنزل'); };
 

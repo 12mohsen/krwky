@@ -44,23 +44,47 @@
   aside h3:first-child{margin-top:0}
   .row{display:flex; gap:6px; align-items:center; margin-bottom:6px}
   .row label{flex:0 0 78px; color:var(--muted)}
-  input[type=number], input[type=text], select{
+  input[type=number], input[type=text], input[type=password], select{
     flex:1; min-width:0; padding:5px 7px; border:1px solid var(--line); border-radius:6px;
     font-family:inherit; font-size:12.5px; background:#fff; color:var(--ink);
   }
   input:focus,select:focus{outline:2px solid var(--accent2); border-color:var(--accent)}
   .btn-wide{width:100%; justify-content:center; margin-top:4px}
   .grid2{display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-top:4px}
-  .projRow{display:flex; align-items:center; gap:7px; padding:5px; border:1px solid var(--line);
-           border-radius:10px; margin-bottom:6px; background:var(--bg)}
+  /* بطاقة مميّزة لأقسام مهمة */
+  .cardx{
+    border:1.5px solid var(--accent); background:var(--accent2);
+    border-radius:14px; padding:10px 11px 12px; margin:14px 0 10px;
+    box-shadow:0 4px 16px rgba(0,0,0,.18);
+  }
+  .cardx h3{
+    margin:0 0 8px; padding-bottom:6px; color:var(--accent);
+    border-bottom:1px solid var(--accent); font-size:12.5px;
+  }
+  .cardx .hint{color:var(--muted)}
+  .cardx input[type=text], .cardx input[type=password]{background:var(--panel)}
+  .projRow{display:flex; align-items:center; gap:7px; padding:6px; border:1px solid var(--line);
+           border-radius:10px; margin-bottom:6px; background:var(--bg); flex-wrap:wrap}
+  .projRow .acts{flex:1 1 100%; display:flex; gap:4px; justify-content:flex-start; margin-top:2px}
   .projRow.cur{border-color:var(--accent); box-shadow:0 0 0 2px var(--accent2)}
-  .projRow img{width:52px; height:35px; object-fit:cover; border-radius:6px; background:#fff; flex:0 0 auto}
+  .projRow img{width:46px; height:32px; object-fit:cover; border-radius:6px; background:#fff; flex:0 0 auto}
   .projInfo{flex:1; min-width:0; display:flex; flex-direction:column; overflow:hidden}
   .projInfo b{font-size:12.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
   .projInfo span{font-size:10.5px; color:var(--muted)}
-  .projRow button{border:none; background:transparent; cursor:pointer; font-size:15px; padding:3px}
-  .projRow button:hover{transform:scale(1.15)}
-  .grid2 button{justify-content:center}
+  .projRow button{border:none; background:transparent; cursor:pointer; font-size:15px;
+                  padding:4px 5px; border-radius:9px; transition:background .15s, transform .12s}
+  .projRow button:hover{transform:scale(1.12); background:rgba(125,140,160,.16)}
+  .projRow .pDel:hover, .projRow .cDel:hover{background:rgba(220,60,64,.20)}
+  .projRow input[type=checkbox]{width:17px; height:17px; accent-color:var(--danger); flex:0 0 auto; cursor:pointer}
+  .selBar{display:flex; align-items:center; gap:8px; margin:6px 0 8px;
+          background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:6px 8px}
+  .selBar label{display:flex; align-items:center; gap:6px; font-size:12px; cursor:pointer; margin:0}
+  .selBar .del{margin-inline-start:auto; border:1px solid var(--danger); color:var(--danger);
+               background:transparent; border-radius:9px; padding:5px 10px; font-size:12px;
+               font-family:inherit; cursor:pointer; font-weight:600}
+  .selBar .del:hover{background:var(--danger); color:#fff}
+  .selBar .del:disabled{opacity:.45; cursor:default; border-color:var(--line); color:var(--muted)}
+  .grid2 button{justify-content:center; white-space:nowrap; font-size:12px; padding:7px 4px}
   .hint{color:var(--muted); font-size:11.5px; line-height:1.7}
   footer{
     background:var(--panel); border-top:1px solid var(--line); padding:4px 12px;
@@ -82,6 +106,39 @@
   }
   #toast.show{opacity:.94}
   input[type=range]{accent-color:var(--accent)}
+  canvas{touch-action:none}
+  #scrim{position:fixed; inset:0; background:rgba(8,11,16,.55); z-index:35; display:none}
+  #scrim.on{display:block}
+  @supports (height:100dvh){ html,body{height:100dvh} }
+
+  /* ================= الجوال واللوحيات ================= */
+  @media (max-width: 860px){
+    header{flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch;
+           gap:5px; padding:6px 8px; scrollbar-width:none}
+    header::-webkit-scrollbar{display:none}
+    header .sep{display:none}
+    .brand{font-size:13px; flex:0 0 auto}
+    .brand small{display:none}
+    button.tool, button.act{flex:0 0 auto; padding:9px 11px; font-size:13px}
+    #btnMenu{display:inline-flex !important; font-size:17px; padding:7px 12px;
+             background:var(--accent); border-color:var(--accent); color:#fff}
+    aside{position:fixed; top:0; bottom:0; left:0; width:min(92vw,350px);
+          transform:translateX(-104%); transition:transform .26s cubic-bezier(.2,.9,.3,1);
+          z-index:40; box-shadow:10px 0 34px rgba(0,0,0,.45); padding-top:14px;
+          border-inline-start:none; border-inline-end:1px solid var(--line)}
+    aside.open{transform:none}
+    #cvwrap{width:100%}
+    footer{font-size:10.5px; gap:9px; flex-wrap:wrap; padding:4px 8px}
+    .row label{flex:0 0 70px; font-size:12px}
+    input[type=text], input[type=password], select{padding:9px 8px; font-size:14px}
+    .projRow img{width:52px; height:36px}
+    .dlgRow button{padding:14px 10px; font-size:15px}
+    #dlg{width:min(94vw,430px); padding:20px 18px 16px}
+  }
+  @media (max-width: 480px){
+    .brand{display:none}
+    button.tool, button.act{padding:9px 9px; font-size:12.5px}
+  }
   input[inputmode="decimal"]{ direction:ltr; text-align:center; letter-spacing:.3px; }
   /* ------- نوافذ الحوار العصرية ------- */
   #ovl{
@@ -140,6 +197,7 @@
   :root[data-theme="dark"] button.tool.on{ background:var(--accent); border-color:var(--accent); color:#0f1319; }
   :root[data-theme="dark"] input[type=number],
   :root[data-theme="dark"] input[type=text],
+  :root[data-theme="dark"] input[type=password],
   :root[data-theme="dark"] select{ background:#1b222b; color:var(--ink); border-color:var(--line); }
   :root[data-theme="dark"] canvas{ background:#141920; }
   :root[data-theme="dark"] #lenBox{ background:#171d25; }
@@ -150,7 +208,11 @@
 <body>
 
 <header>
-  <div class="brand">📐 كروكي <small>— مخططات معمارية بالأبعاد</small></div>
+  <button class="act" id="btnMenu" title="الأدوات والإعدادات" style="display:none">☰</button>
+  <div class="brand">📐 كروكي <small>— مخططات معمارية بالأبعاد</small>
+    <span id="verTag" style="font-size:10px;font-weight:700;color:var(--accent);
+      border:1px solid var(--accent);border-radius:6px;padding:1px 5px;margin-inline-start:6px">v3 · جوال</span>
+  </div>
   <div class="sep"></div>
   <button class="tool on" data-tool="select" title="تحديد وتحريك (V)">↖ تحديد</button>
   <button class="tool" data-tool="wall" title="رسم جدران (W)">▬ جدار</button>
@@ -184,6 +246,7 @@
   </div>
 </div>
 
+<div id="scrim"></div>
 <div id="main">
   <div id="cvwrap">
     <canvas id="cv"></canvas>
@@ -192,6 +255,9 @@
   </div>
 
   <aside>
+    <div class="hint" style="text-align:center;margin-bottom:8px">
+      كروكي — الإصدار 3.0 (يدعم الجوال واللمس)
+    </div>
     <h3>إعدادات الرسم</h3>
     <div class="row"><label>سمك الجدار</label><input type="text" inputmode="decimal" id="wt" value="0.20" step="0.05" min="0.05"><span class="hint">م</span></div>
     <div class="row"><label>عرض الباب</label><input type="text" inputmode="decimal" id="dw" value="0.90" step="0.05" min="0.3"><span class="hint">م</span></div>
@@ -288,16 +354,30 @@
     <h3>خصائص المحدد</h3>
     <div id="props"><div class="hint">لم يتم تحديد أي عنصر. استخدم أداة «تحديد» واضغط على جدار أو باب أو نص.</div></div>
 
-    <h3>💾 مشاريعي (داخل التطبيق)</h3>
-    <button class="act btn-wide" id="bSaveDb">💾 حفظ المشروع في التطبيق</button>
+    <div class="cardx" style="border-color:var(--line); background:var(--bg)">
+    <h3 style="color:var(--ink); border-bottom-color:var(--line)">💾 مشاريعي (داخل التطبيق)</h3>
+    <div class="grid2">
+      <button class="act" id="bSaveDb">💾 حفظ</button>
+      <button class="act" id="bSaveNew">🆕 نسخة جديدة</button>
+    </div>
     <label class="chk"><input type="checkbox" id="autoSave" checked> حفظ تلقائي واستئناف آخر عمل</label>
+    <div class="selBar" id="pjBar" style="display:none">
+      <label><input type="checkbox" id="pjAll"> تحديد الكل</label>
+      <button class="del" id="pjDel" disabled>🗑 حذف المحدد</button>
+    </div>
     <div id="projList"><div class="hint">لا توجد مشاريع محفوظة بعد.</div></div>
     <div class="hint">المشاريع تُحفظ داخل المتصفح على هذا الجهاز وتبقى بعد إغلاق التطبيق. للنقل بين الأجهزة استخدم «حفظ المشروع (ملف)».</div>
+    </div>
 
+    <div class="cardx">
     <h3>☁️ المزامنة السحابية</h3>
     <div id="sbOut">
-      <div class="row"><label>اسم المستخدم</label><input type="text" id="sbUser" placeholder="mohsen"></div>
-      <div class="row"><label>كلمة السر</label><input type="password" id="sbPass"></div>
+      <div class="row"><label>المستخدم</label><input type="text" id="sbUser" placeholder="ali"></div>
+      <div class="row"><label>كلمة السر</label>
+        <input type="password" id="sbPass" autocomplete="current-password" spellcheck="false">
+        <button class="act" id="sbEye" title="إظهار كلمة السر"
+                style="flex:0 0 34px;padding:5px 0;justify-content:center">👁</button>
+      </div>
       <div class="grid2">
         <button class="act" id="sbLogin" style="background:var(--accent);border-color:var(--accent);color:#fff">🔑 دخول</button>
         <button class="act" id="sbSignup">＋ حساب جديد</button>
@@ -314,14 +394,23 @@
     <div id="sbIn" style="display:none">
       <div class="hint" id="sbWho"></div>
       <div class="grid2">
-        <button class="act" id="sbPush">⬆️ رفع الحالي</button>
-        <button class="act" id="sbSync">🔄 تحديث</button>
+        <button class="act" id="sbPush" title="يرفع التعديلات إلى نفس المشروع في السحابة">⬆️ رفع/تحديث</button>
+        <button class="act" id="sbPushNew" title="يرفعه كمشروع مستقل جديد">🆕 رفع نسخة</button>
+      </div>
+      <div class="grid2">
+        <button class="act" id="sbSync" title="يعيد جلب قائمة المشاريع من السحابة">🔄 تحديث القائمة</button>
+        <button class="act" id="sbOut2b" style="visibility:hidden">.</button>
       </div>
       <label class="chk"><input type="checkbox" id="sbAuto" checked> رفع تلقائي عند كل حفظ</label>
+      <div class="selBar" id="sbBar" style="display:none">
+        <label><input type="checkbox" id="sbAll"> تحديد الكل</label>
+        <button class="del" id="sbDel" disabled>🗑 حذف المحدد</button>
+      </div>
       <div id="sbList"></div>
       <button class="act btn-wide" id="sbOut2">🚪 خروج</button>
     </div>
     <div class="hint">اسم المستخدم وكلمة السر فقط — الخادم مضبوط داخل التطبيق. سجّل الدخول من أي جهاز فتظهر مشاريعك كلها.</div>
+    </div>
 
     <h3>🏷️ أسماء الغرف</h3>
     <div id="roomList"><div class="hint">لا توجد غرف مغلقة بعد.</div></div>
@@ -1025,9 +1114,21 @@ function evPos(e){
 }
 cv.addEventListener('contextmenu', function(e){ e.preventDefault(); });
 
+var ptrs={}, ptrN=0, pinch=null;
+function ptrList(){ var a=[]; for(var k in ptrs) a.push(ptrs[k]); return a; }
 cv.addEventListener('pointerdown', function(e){
-  cv.setPointerCapture(e.pointerId);
+  try{ cv.setPointerCapture(e.pointerId); }catch(err){}
   var q=evPos(e); var p=toWorld(q.sx,q.sy);
+  if(!ptrs[e.pointerId]) ptrN++;
+  ptrs[e.pointerId]={x:q.sx, y:q.sy};
+  if(ptrN===2){                       /* إصبعان: تكبير/تصغير وتحريك */
+    var a=ptrList();
+    pinch={d:Math.max(1,Math.hypot(a[0].x-a[1].x, a[0].y-a[1].y)),
+           mx:(a[0].x+a[1].x)/2, my:(a[0].y+a[1].y)/2,
+           ppm:view.ppm, ox:view.ox, oy:view.oy};
+    dragging=null; panning=null; draft=null; hideLenBox(); render();
+    return;
+  }
   if(e.button===1 || e.button===2){ panning={sx:q.sx, sy:q.sy, ox:view.ox, oy:view.oy}; return; }
 
   if(tool==='select'){
@@ -1111,6 +1212,19 @@ cv.addEventListener('pointerdown', function(e){
 
 cv.addEventListener('pointermove', function(e){
   var q=evPos(e); var p=toWorld(q.sx,q.sy);
+  if(ptrs[e.pointerId]) ptrs[e.pointerId]={x:q.sx, y:q.sy};
+  if(pinch && ptrN>=2){
+    var a=ptrList();
+    if(a.length>=2){
+      var d=Math.max(1,Math.hypot(a[0].x-a[1].x, a[0].y-a[1].y));
+      var mx=(a[0].x+a[1].x)/2, my=(a[0].y+a[1].y)/2;
+      var np=Math.max(4, Math.min(700, pinch.ppm*(d/pinch.d)));
+      var wx=(pinch.mx-pinch.ox)/pinch.ppm, wy=(pinch.my-pinch.oy)/pinch.ppm;
+      view.ppm=np; view.ox=mx-wx*np; view.oy=my-wy*np;
+      render();
+    }
+    return;
+  }
   mouse=p; mouse.sx=q.sx; mouse.sy=q.sy;
   $('sxy').textContent=fmt(p.x)+' , '+fmt(p.y);
 
@@ -1171,7 +1285,15 @@ cv.addEventListener('pointermove', function(e){
   }
 });
 
+function ptrEnd(e){
+  if(ptrs[e.pointerId]){ delete ptrs[e.pointerId]; ptrN=Math.max(0, ptrN-1); }
+  if(ptrN<2) pinch=null;
+}
+cv.addEventListener('pointercancel', ptrEnd);
 cv.addEventListener('pointerup', function(e){
+  var wasPinch=!!pinch;
+  ptrEnd(e);
+  if(wasPinch){ dragging=null; return; }
   if(panning){ panning=null; return; }
   if(dragging){ dragging=null; return; }
   if(draft && draft.k==='room'){
@@ -1453,7 +1575,7 @@ function openDialog(o){
     inp.style.display=''; $('dlgHint').style.display='';
     inp.value=(o.value!==undefined? o.value:'');
     inp.placeholder=o.placeholder||'';
-    inp.type=o.numeric? 'text':'text';
+    inp.type=o.password? 'password' : 'text';
     inp.inputMode=o.numeric? 'decimal':'text';
   } else { inp.style.display='none'; $('dlgHint').style.display='none'; }
   $('ovl').style.display='flex';
@@ -1468,9 +1590,9 @@ function askConfirm(title, msg, cb, opt){
 }
 function askText(title, msg, value, cb, opt){
   opt=opt||{};
-  openDialog({icon:opt.icon||'✏️', tone:'', title:title, msg:msg, input:true,
+  openDialog({icon:opt.icon||'✏️', tone:opt.tone||'', title:title, msg:msg, input:true,
     value:value, placeholder:opt.placeholder||'', numeric:!!opt.numeric,
-    okText:opt.okText||'تأكيد',
+    password:!!opt.password, danger:!!opt.danger,
     cb:function(v){ if(v!==null) cb(v); }});
 }
 function showInfo(title, msg, icon){
@@ -1499,19 +1621,20 @@ function idb(){
   return new Promise(function(res,rej){
     if(DBH) return res(DBH);
     if(!window.indexedDB) return rej(new Error('no-idb'));
-    var rq=indexedDB.open('krooki-db',1);
+    var rq=indexedDB.open('krooki-db',2);
     rq.onupgradeneeded=function(){
       var db=rq.result;
       if(!db.objectStoreNames.contains('projects')) db.createObjectStore('projects',{keyPath:'id'});
+      if(!db.objectStoreNames.contains('history')) db.createObjectStore('history',{keyPath:'key'});
     };
     rq.onsuccess=function(){ DBH=rq.result; res(DBH); };
     rq.onerror=function(){ rej(rq.error); };
   });
 }
-function idbRun(mode, fn){
+function idbRun(mode, fn, store){
   return idb().then(function(db){
     return new Promise(function(res,rej){
-      var tx=db.transaction('projects',mode), st=tx.objectStore('projects'), out;
+      var tx=db.transaction(store||'projects',mode), st=tx.objectStore(store||'projects'), out;
       out=fn(st);
       tx.oncomplete=function(){ res(out && out.result!==undefined? out.result : out); };
       tx.onerror=function(){ rej(tx.error); };
@@ -1543,13 +1666,36 @@ function makeThumb(w,h){
   view=sv; EXPORTING=se;
   return c.toDataURL('image/jpeg',0.6);
 }
+function keepHistory(id){
+  if(!id) return Promise.resolve();
+  return idbRun('readonly', function(st){ return st.get(id); }).then(function(old){
+    if(!old || !old.data) return;
+    var h={key:id+'|'+old.ts, id:id, ts:old.ts, name:old.name, walls:old.walls,
+           thumb:old.thumb, data:old.data};
+    return idbRun('readwrite', function(st){ st.put(h); }, 'history').then(function(){
+      /* الإبقاء على آخر ٨ نسخ لكل مشروع */
+      return idbRun('readonly', function(st){ return st.getAll(); }, 'history');
+    }).then(function(all){
+      var mine=(all||[]).filter(function(x){ return x.id===id; })
+                        .sort(function(a,b){ return b.ts-a.ts; });
+      if(mine.length>8){
+        var drop=mine.slice(8);
+        return idbRun('readwrite', function(st){
+          drop.forEach(function(d){ st.delete(d.key); });
+        }, 'history');
+      }
+    });
+  }).catch(function(){});
+}
 function saveProject(name, id){
   var rec={ id: id || ('p'+Date.now()), name: name || ($('pname').value||'مخطط'),
             ts: Date.now(), walls: doc.walls.length,
             thumb: makeThumb(150,100), data: JSON.stringify(projPayload()) };
-  return idbRun('readwrite', function(st){ st.put(rec); }).then(function(){
+  return keepHistory(rec.id).then(function(){
+    return idbRun('readwrite', function(st){ st.put(rec); });
+  }).then(function(){
     curProj=rec.id; lastSaved=rec.data; buildProjList(true);
-    if(SB.on && $('sbAuto') && on('sbAuto')){
+    if(SB.on && $('sbAuto') && on('sbAuto') && rec.id!=='auto'){
       cloudPush(rec.id, rec.name).catch(function(){ toast('تعذّر الرفع للسحابة — حُفظ محلياً'); });
     }
     return rec;
@@ -1571,30 +1717,70 @@ function loadProject(rec){
     toast('تم فتح: '+(d.name||rec.name));
   }catch(e){ showInfo('تعذّر الفتح','هذا المشروع تالف أو بصيغة غير مدعومة.','⚠️'); }
 }
-var projListKey='';
+var projListKey='', histMode=false;
 function buildProjList(force){
   var el=$('projList'); if(!el) return;
+  if(histMode && !force) return;          /* لا نستبدل شاشة النسخ السابقة */
   idbRun('readonly', function(st){ return st.getAll(); }).then(function(list){
     list=(list||[]).sort(function(a,b){ return b.ts-a.ts; });
     var key=list.map(function(r){ return r.id+r.ts; }).join('|')+'#'+curProj;
     if(!force && key===projListKey) return;
     projListKey=key;
-    if(!list.length){ el.innerHTML='<div class="hint">لا توجد مشاريع محفوظة بعد.</div>'; return; }
+    if(!list.length){ el.innerHTML='<div class="hint">لا توجد مشاريع محفوظة بعد.</div>'; if($('pjBar')) $('pjBar').style.display='none'; return; }
     var h='';
     list.forEach(function(r){
       var d=new Date(r.ts);
       var dt=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')
              +' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
       h+='<div class="projRow'+(r.id===curProj?' cur':'')+'" data-id="'+r.id+'">'+
+         '<input type="checkbox" class="pSel">'+
          '<img src="'+r.thumb+'" alt="">'+
          '<div class="projInfo"><b>'+String(r.name).replace(/</g,'&lt;')+'</b><span>'+dt+' — '+r.walls+' جدار</span></div>'+
-         '<button class="pOpen" title="فتح">📂</button><button class="pDel" title="حذف">🗑</button></div>';
+         '<div class="acts"><button class="pOpen" title="فتح">📂 فتح</button>'+
+         '<button class="pHist" title="النسخ السابقة">🕘</button>'+
+         '<button class="pDel" title="حذف">🗑</button></div></div>';
     });
     el.innerHTML=h;
+    wireSel('projList','pSel','pjBar','pjAll','pjDel');
+    $('pjDel').onclick=function(){
+      var ids=selIds('projList','pSel'); if(!ids.length) return;
+      askConfirm('حذف من هذا الجهاز',
+        'سيُحذف '+ids.length+' مشروعاً من ذاكرة التطبيق على هذا الجهاز فقط (تبقى نسخ السحابة).',
+        function(){ deleteLocalIds(ids); }, {icon:'🗑', okText:'احذف'});
+    };
     Array.prototype.forEach.call(el.querySelectorAll('.projRow'), function(row){
       var id=row.dataset.id;
       row.querySelector('.pOpen').onclick=function(){
         idbRun('readonly', function(st){ return st.get(id); }).then(function(rec){ if(rec) loadProject(rec); });
+      };
+      row.querySelector('.pHist').onclick=function(){
+        idbRun('readonly', function(st){ return st.getAll(); }, 'history').then(function(all){
+          var mine=(all||[]).filter(function(x){ return x.id===id; })
+                            .sort(function(a,b){ return b.ts-a.ts; });
+          if(!mine.length){ showInfo('لا توجد نسخ سابقة','هذا المشروع لم يُستبدل بعد، فلا توجد نسخة أقدم محفوظة.','🕘'); return; }
+          var el=$('projList'); histMode=true;
+          var h='<div class="hint" style="margin:4px 0">النسخ السابقة لهذا المشروع — اضغط 📂 لاستعادتها:</div>';
+          mine.forEach(function(r,i){
+            var d=new Date(r.ts);
+            h+='<div class="projRow" data-k="'+r.key+'">'+(r.thumb?'<img src="'+r.thumb+'">':'')+
+               '<div class="projInfo"><b>🕘 '+String(r.name||'').replace(/</g,'&lt;')+'</b><span>'+
+               d.toLocaleString('ar-EG')+' — '+(r.walls||0)+' جدار</span></div>'+
+               '<div class="acts"><button class="hOpen" title="استعادة">📂 استعادة</button></div></div>';
+          });
+          h+='<button class="act btn-wide" id="histBack">↩ رجوع للقائمة</button>';
+          el.innerHTML=h;
+          Array.prototype.forEach.call(el.querySelectorAll('.projRow'), function(r2){
+            r2.querySelector('.hOpen').onclick=function(){
+              var k=r2.dataset.k;
+              idbRun('readonly', function(st){ return st.get(k); }, 'history').then(function(rec){
+                if(rec){ loadProject({id:rec.id, name:rec.name, data:rec.data});
+                         toast('تم استرجاع نسخة '+new Date(rec.ts).toLocaleString('ar-EG')); }
+                histMode=false; projListKey=''; buildProjList(true);
+              });
+            };
+          });
+          $('histBack').onclick=function(){ histMode=false; projListKey=''; buildProjList(true); };
+        });
       };
       row.querySelector('.pDel').onclick=function(){
         askConfirm('حذف المشروع','سيُحذف هذا المشروع من ذاكرة التطبيق نهائياً.', function(){
@@ -1609,13 +1795,30 @@ function buildProjList(force){
     el.innerHTML='<div class="hint">ذاكرة التطبيق غير متاحة في هذا المتصفح.</div>';
   });
 }
+$('bSaveNew').onclick=function(){
+  askText('حفظ نسخة جديدة','تُحفظ كمشروع مستقل ولا تُستبدل بها النسخة الحالية.',
+    ($('pname').value||'مخطط')+' — نسخة', function(v){
+      v=String(v).trim(); if(!v) return;
+      $('pname').value=v;
+      curProj=null;                      /* معرّف جديد = مشروع جديد */
+      saveProject(v, null).then(function(rec){
+        if(SB.on) cloudPush(rec.id, rec.name).catch(function(){});
+        toast('تم حفظ نسخة جديدة');
+      });
+    }, {icon:'🆕', okText:'حفظ نسخة'});
+};
 $('bSaveDb').onclick=function(){
-  askText('حفظ في التطبيق','اكتب اسماً لهذا المشروع ليُحفظ داخل التطبيق ويظهر في القائمة.',
+  var open=(curProj && curProj!=='auto');
+  askText(open? 'تحديث المشروع':'حفظ في التطبيق',
+    open? 'سيُحدَّث المشروع المفتوح، وتُحفظ نسخته السابقة في السجل (🕘) لاسترجاعها متى شئت.'
+        : 'اكتب اسماً لهذا المشروع ليُحفظ داخل التطبيق ويظهر في القائمة.',
     $('pname').value||'مخطط', function(v){
       v=String(v).trim(); if(!v) return;
       $('pname').value=v;
-      saveProject(v, null).then(function(){ toast('تم الحفظ في التطبيق'); });
-    }, {icon:'💾', okText:'حفظ'});
+      saveProject(v, open? curProj : null).then(function(){
+        toast(open? 'تم تحديث المشروع':'تم الحفظ في التطبيق');
+      });
+    }, {icon:'💾', okText: open? 'تحديث':'حفظ'});
 };
 /* حفظ تلقائي كل 12 ثانية عند وجود تغيير */
 setInterval(function(){
@@ -1624,10 +1827,14 @@ setInterval(function(){
   var cur=JSON.stringify(projPayload());
   if(cur===lastSaved) return;
   lastSaved=cur;
-  var rec={ id: curProj || 'auto', name: $('pname').value||'عمل غير مسمّى', ts:Date.now(),
-            walls: doc.walls.length, thumb: makeThumb(150,100), data: cur };
-  idbRun('readwrite', function(st){ st.put(rec); }).then(function(){
-    curProj=rec.id; buildProjList(true);
+  /* الحفظ التلقائي يكتب في خانة «عمل جارٍ» المحلية فقط، ولا يمس مشروعاً محفوظاً ولا السحابة */
+  var target = (curProj && curProj!=='auto')? curProj : 'auto';
+  var rec={ id: target, name: (target==='auto')? ($('pname').value||'عمل جارٍ') : ($('pname').value||'مخطط'),
+            ts:Date.now(), walls: doc.walls.length, thumb: makeThumb(150,100), data: cur };
+  keepHistory(target).then(function(){
+    return idbRun('readwrite', function(st){ st.put(rec); });
+  }).then(function(){
+    curProj=rec.id; projListKey=''; buildProjList(true);
   }).catch(function(){});
 }, 12000);
 
@@ -1639,15 +1846,59 @@ var SB_DEF={
 };
 var SB={url:SB_DEF.url, key:SB_DEF.key, user:'', hash:'', alt:'', on:false};
 
+/* SHA-256 احتياطي بلغة JS — يعمل في أي بيئة حتى لو تعذّر crypto.subtle */
+function sha256js(msg){
+  function rr(x,n){ return (x>>>n)|(x<<(32-n)); }
+  var K=[0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,
+         0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,
+         0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,
+         0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,
+         0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,
+         0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,
+         0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,
+         0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+  var H=[0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
+  var bytes=[], i, c;
+  var utf=unescape(encodeURIComponent(msg));
+  for(i=0;i<utf.length;i++) bytes.push(utf.charCodeAt(i)&0xff);
+  var bitLen=bytes.length*8;
+  bytes.push(0x80);
+  while(bytes.length%64!==56) bytes.push(0);
+  for(i=7;i>=0;i--) bytes.push((bitLen/Math.pow(2,i*8))&0xff);
+  var w=new Array(64);
+  for(var off=0; off<bytes.length; off+=64){
+    for(i=0;i<16;i++) w[i]=(bytes[off+i*4]<<24)|(bytes[off+i*4+1]<<16)|(bytes[off+i*4+2]<<8)|bytes[off+i*4+3];
+    for(i=16;i<64;i++){
+      var s0=rr(w[i-15],7)^rr(w[i-15],18)^(w[i-15]>>>3);
+      var s1=rr(w[i-2],17)^rr(w[i-2],19)^(w[i-2]>>>10);
+      w[i]=(w[i-16]+s0+w[i-7]+s1)|0;
+    }
+    var a=H[0],b=H[1],cc=H[2],d=H[3],e=H[4],f=H[5],g=H[6],h=H[7];
+    for(i=0;i<64;i++){
+      var S1=rr(e,6)^rr(e,11)^rr(e,25);
+      var ch=(e&f)^((~e)&g);
+      var t1=(h+S1+ch+K[i]+w[i])|0;
+      var S0=rr(a,2)^rr(a,13)^rr(a,22);
+      var mj=(a&b)^(a&cc)^(b&cc);
+      var t2=(S0+mj)|0;
+      h=g; g=f; f=e; e=(d+t1)|0; d=cc; cc=b; b=a; a=(t1+t2)|0;
+    }
+    H[0]=(H[0]+a)|0; H[1]=(H[1]+b)|0; H[2]=(H[2]+cc)|0; H[3]=(H[3]+d)|0;
+    H[4]=(H[4]+e)|0; H[5]=(H[5]+f)|0; H[6]=(H[6]+g)|0; H[7]=(H[7]+h)|0;
+  }
+  var out='';
+  for(i=0;i<8;i++) out+=('00000000'+(H[i]>>>0).toString(16)).slice(-8);
+  return out;
+}
 function sha256hex(txt){
   if(window.crypto && crypto.subtle && crypto.subtle.digest){
     return crypto.subtle.digest('SHA-256', new TextEncoder().encode(txt)).then(function(buf){
       var a=new Uint8Array(buf), h='';
       for(var i=0;i<a.length;i++) h+=('0'+a[i].toString(16)).slice(-2);
       return h;
-    });
+    }).catch(function(){ return sha256js(txt); });
   }
-  return Promise.resolve('');
+  return Promise.resolve(sha256js(txt));
 }
 function b64(txt){
   try{ return btoa(unescape(encodeURIComponent(txt))); }catch(e){ return ''; }
@@ -1743,6 +1994,18 @@ function sbCreds(){
   });
 }
 $('sbPass').addEventListener('keydown', function(e){ if(e.key==='Enter') $('sbLogin').click(); });
+$('sbEye').onclick=function(){
+  var e=$('sbPass');
+  e.type = (e.type==='password')? 'text':'password';
+  $('sbEye').textContent = (e.type==='password')? '👁':'🙈';
+  e.focus();
+};
+['sbUser','sbPass'].forEach(function(id){
+  $(id).addEventListener('keydown', function(e){
+    e.stopPropagation();
+    if(e.key==='Enter'){ e.preventDefault(); $('sbLogin').click(); }
+  });
+});
 $('sbLogin').onclick=function(){
   sbCreds().then(function(){
     return rpc('krooki_list', {p_user:SB.user, p_hash:SB.hash, p_alt:SB.alt});
@@ -1758,7 +2021,7 @@ $('sbLogin').onclick=function(){
     }
     else if(/دخول غير صحيحة|invalid_grant/i.test(m)){
       askConfirm('لا يوجد حساب بهذا الاسم',
-        'الاسم «'+$('sbUser').value.trim()+'» غير مسجّل، أو كلمة السر غير صحيحة. هل تريد إنشاء حساب جديد بهذا الاسم؟',
+        'الاسم «'+$('sbUser').value.trim()+'» غير مسجّل، أو كلمة السر غير صحيحة.\n\nتأكد أن لوحة المفاتيح بالإنجليزية، واضغط 👁 لرؤية ما كتبته. هل تريد إنشاء حساب جديد بهذا الاسم؟',
         function(){ $('sbSignup').click(); },
         {icon:'🔑', okText:'أنشئ حساباً', danger:false});
       return;
@@ -1810,30 +2073,56 @@ function cloudPush(id, name){
   if(data.length > 6000000) { toast('المشروع كبير جداً للرفع — احفظه كملف'); return Promise.resolve(); }
   return rpc('krooki_save', {p_user:SB.user, p_hash:SB.hash, p_alt:SB.alt,
       p_id:id, p_name:name, p_walls:doc.walls.length, p_thumb:makeThumb(150,100), p_data:data})
-    .then(function(){ return rpc('krooki_list', {p_user:SB.user, p_hash:SB.hash, p_alt:SB.alt}); })
+    .then(function(){
+      /* هذا صار المشروع الحالي: أي رفع لاحق يحدّثه ولا ينشئ نسخة */
+      curProj=id; lastSaved=data;
+      return idbRun('readwrite', function(st){
+        st.put({id:id, name:name, ts:Date.now(), walls:doc.walls.length,
+                thumb:makeThumb(150,100), data:data});
+      }).catch(function(){});
+    })
+    .then(function(){ projListKey=''; buildProjList(true);
+      return rpc('krooki_list', {p_user:SB.user, p_hash:SB.hash, p_alt:SB.alt}); })
     .then(function(l){ renderCloud(l||[]); });
 }
+$('sbPushNew').onclick=function(){
+  var nm=($('pname').value||'مخطط')+' — نسخة';
+  toast('جارٍ الرفع…');
+  cloudPush('p'+Date.now(), nm)
+    .then(function(){ toast('تم رفع نسخة مستقلة'); })
+    .catch(function(e){ showInfo('تعذّر الرفع', String(e.message||e), '⚠️'); });
+};
 $('sbPush').onclick=function(){
   var nm=$('pname').value||'مخطط';
+  var upd=!!(curProj && curProj!=='auto');
   toast('جارٍ الرفع…');
-  cloudPush(curProj||('p'+Date.now()), nm)
-    .then(function(){ toast('تم رفع «'+nm+'» إلى السحابة'); })
+  cloudPush(upd? curProj : ('p'+Date.now()), nm)
+    .then(function(){ toast(upd? 'تم تحديث «'+nm+'» في السحابة' : 'تم رفع «'+nm+'» إلى السحابة'); })
     .catch(function(e){ showInfo('تعذّر الرفع', String(e.message||e), '⚠️'); });
 };
 function renderCloud(list){
   var el=$('sbList');
-  if(!list.length){ el.innerHTML='<div class="hint">لا توجد مشاريع في السحابة بعد.</div>'; return; }
+  if(!list.length){ el.innerHTML='<div class="hint">لا توجد مشاريع في السحابة بعد.</div>'; if($('sbBar')) $('sbBar').style.display='none'; return; }
   var h='';
   list.forEach(function(r){
     var d=new Date(r.updated_at);
     var dt=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')
            +' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
-    h+='<div class="projRow" data-id="'+r.id+'">'+
+    h+='<div class="projRow'+(r.id===curProj?' cur':'')+'" data-id="'+r.id+'">'+
+       '<input type="checkbox" class="cSel">'+
        (r.thumb? '<img src="'+r.thumb+'" alt="">':'')+
        '<div class="projInfo"><b>☁️ '+String(r.name).replace(/</g,'&lt;')+'</b><span>'+dt+' — '+(r.walls||0)+' جدار</span></div>'+
-       '<button class="cOpen" title="فتح">📂</button><button class="cDel" title="حذف">🗑</button></div>';
+       '<div class="acts"><button class="cOpen" title="فتح">📂 فتح</button>'+
+       '<button class="cDel" title="حذف">🗑</button></div></div>';
   });
   el.innerHTML=h;
+  wireSel('sbList','cSel','sbBar','sbAll','sbDel');
+  $('sbDel').onclick=function(){
+    var ids=selIds('sbList','cSel'); if(!ids.length) return;
+    confirmPass('حذف من السحابة',
+      'سيُحذف '+ids.length+' مشروعاً نهائياً من حسابك السحابي ومن هذا الجهاز — في كل أجهزتك.',
+      function(){ deleteCloudIds(ids); });
+  };
   Array.prototype.forEach.call(el.querySelectorAll('.projRow'), function(row){
     var id=row.dataset.id;
     row.querySelector('.cOpen').onclick=function(){
@@ -1846,14 +2135,77 @@ function renderCloud(list){
         .catch(function(e){ showInfo('تعذّر الفتح', String(e.message||e), '⚠️'); });
     };
     row.querySelector('.cDel').onclick=function(){
-      askConfirm('حذف من السحابة','سيُحذف هذا المشروع من حسابك السحابي في كل الأجهزة.', function(){
-        rpc('krooki_del', {p_user:SB.user, p_hash:SB.hash, p_alt:SB.alt, p_id:id})
-          .then(function(){ return rpc('krooki_list', {p_user:SB.user, p_hash:SB.hash, p_alt:SB.alt}); })
-          .then(function(l){ renderCloud(l||[]); toast('تم الحذف من السحابة'); })
-          .catch(function(){ toast('تعذّر الحذف'); });
-      }, {icon:'🗑', okText:'احذف'});
+      confirmPass('حذف من السحابة',
+        'سيُحذف هذا المشروع نهائياً من حسابك السحابي ومن هذا الجهاز — في كل أجهزتك.',
+        function(){ deleteCloudIds([id]); });
     };
   });
+}
+
+/* ============================ التحديد والحذف الجماعي ============================ */
+function selIds(container, cls){
+  var out=[];
+  Array.prototype.forEach.call(document.querySelectorAll('#'+container+' .'+cls), function(c){
+    if(c.checked) out.push(c.closest('.projRow').dataset.id);
+  });
+  return out;
+}
+function wireSel(container, cls, barId, allId, delId){
+  var bar=$(barId); if(!bar) return;
+  var rows=document.querySelectorAll('#'+container+' .projRow');
+  bar.style.display = rows.length? 'flex':'none';
+  var upd=function(){
+    var n=selIds(container, cls).length;
+    $(delId).disabled = n===0;
+    $(delId).textContent = n? ('🗑 حذف المحدد ('+n+')') : '🗑 حذف المحدد';
+    var all=document.querySelectorAll('#'+container+' .'+cls).length;
+    $(allId).checked = (n>0 && n===all);
+  };
+  Array.prototype.forEach.call(document.querySelectorAll('#'+container+' .'+cls), function(c){
+    c.addEventListener('change', upd);
+  });
+  $(allId).onclick=function(){
+    var v=$(allId).checked;
+    Array.prototype.forEach.call(document.querySelectorAll('#'+container+' .'+cls), function(c){ c.checked=v; });
+    upd();
+  };
+  upd();
+}
+/* التأكيد بكلمة السر قبل الحذف من السحابة */
+function confirmPass(title, msg, cb){
+  if(!SB.on){ askConfirm(title, msg, cb, {icon:'🗑', okText:'احذف'}); return; }
+  askText(title, msg+'\n\nاكتب كلمة سر حسابك «'+SB.user+'» للتأكيد.', '', function(v){
+    sha256hex(String(v)).then(function(h){
+      if(h===SB.hash || b64(String(v))===SB.alt) cb();
+      else showInfo('كلمة السر غير صحيحة','لم يُحذف شيء. حاول مرة أخرى.','🔒');
+    });
+  }, {icon:'🔒', password:true, okText:'تأكيد الحذف', danger:true});
+}
+function deleteCloudIds(ids, done){
+  var i=0, okCount=0;
+  (function next(){
+    if(i>=ids.length){
+      rpc('krooki_list', {p_user:SB.user, p_hash:SB.hash, p_alt:SB.alt})
+        .then(function(l){ renderCloud(l||[]); }).catch(function(){});
+      projListKey=''; buildProjList(true);
+      toast('تم حذف '+okCount+' مشروعاً');
+      if(done) done();
+      return;
+    }
+    var id=ids[i++];
+    rpc('krooki_del', {p_user:SB.user, p_hash:SB.hash, p_alt:SB.alt, p_id:id})
+      .then(function(){ okCount++; return idbRun('readwrite', function(st){ st.delete(id); }).catch(function(){}); })
+      .catch(function(){})
+      .then(function(){ if(curProj===id) curProj=null; next(); });
+  })();
+}
+function deleteLocalIds(ids){
+  return idbRun('readwrite', function(st){ ids.forEach(function(id){ st.delete(id); }); })
+    .then(function(){
+      ids.forEach(function(id){ if(curProj===id) curProj=null; });
+      projListKey=''; buildProjList(true);
+      toast('تم حذف '+ids.length+' مشروعاً من الجهاز');
+    });
 }
 
 /* ============================ قائمة الغرف ============================ */
@@ -3141,6 +3493,22 @@ $('bSample').onclick=function(){ pushUndo(); sample(); toast('تم تحميل م
 /* واجهة صغيرة للقراءة (تُستخدم في الاختبار الآلي) */
 window.KROOKI={ getDoc:function(){return doc;}, toScr:function(p){return toScr(p);}, canvas:cv,
   hitAt:function(sx,sy){ return hitTest(toWorld(sx,sy)); }, world:function(sx,sy){ return toWorld(sx,sy); } };
+/* درج الإعدادات على الجوال */
+(function(){
+  var aside=document.querySelector('aside'), scrim=$('scrim');
+  function setOpen(v){
+    aside.classList.toggle('open', v);
+    scrim.classList.toggle('on', v);
+  }
+  $('btnMenu').onclick=function(){ setOpen(!aside.classList.contains('open')); };
+  scrim.onclick=function(){ setOpen(false); };
+  /* إغلاق الدرج تلقائياً بعد اختيار أداة على الجوال */
+  Array.prototype.forEach.call(document.querySelectorAll('button.tool'), function(b){
+    b.addEventListener('click', function(){ if(window.innerWidth<=860) setOpen(false); });
+  });
+  window.__drawer=setOpen;
+})();
+
 window.addEventListener('resize', render);
 $('bTheme').onclick=function(){ setTheme(THEME==='dark'?'light':'dark'); };
 (function(){

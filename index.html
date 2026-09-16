@@ -111,6 +111,13 @@
   .selBar .del:hover{background:var(--danger); color:#fff}
   .selBar .del:disabled{opacity:.45; cursor:default; border-color:var(--line); color:var(--muted)}
   .grid2 button{justify-content:center; white-space:nowrap; font-size:12px; padding:7px 4px}
+  .fgrid{display:grid; grid-template-columns:1fr 1fr; gap:4px; margin:3px 0 7px}
+  .fgrid button{justify-content:center; white-space:nowrap; font-size:11.5px; padding:7px 3px;
+                overflow:hidden; text-overflow:ellipsis}
+  .fgrid button.on{background:var(--accent); border-color:var(--accent); color:#fff}
+  .fcat{font-size:11px; color:var(--muted); margin:8px 0 2px; font-weight:700}
+  input[type=color]{width:42px; height:28px; padding:1px; border:1px solid var(--line);
+                    border-radius:7px; background:var(--panel); cursor:pointer}
   .hint{color:var(--muted); font-size:11.5px; line-height:1.7}
   footer{
     background:var(--panel); border-top:1px solid var(--line); padding:4px 12px;
@@ -233,6 +240,53 @@
   :root[data-theme="dark"] #lenBox{ background:#171d25; }
   :root[data-theme="dark"] #lenBox input{ background:transparent; color:var(--ink); }
   :root[data-theme="dark"] header{ box-shadow:0 1px 3px rgba(0,0,0,.5); }
+  /* ------- العرض ثلاثي الأبعاد ------- */
+  #v3d{position:fixed; inset:0; z-index:70; display:none; background:#0d1117}
+  #v3d.show{display:block}
+  #cv3{position:absolute; inset:0; width:100%; height:100%; display:block; touch-action:none; cursor:grab}
+  #cv3.grabbing{cursor:grabbing}
+  #bar3d{position:absolute; top:0; inset-inline:0; display:flex; flex-wrap:wrap; gap:6px;
+         align-items:center; padding:calc(8px + env(safe-area-inset-top)) 12px 8px;
+         background:linear-gradient(180deg, rgba(10,14,20,.86), rgba(10,14,20,0));
+         pointer-events:none}
+  #bar3d button, #bar3d .t3{pointer-events:auto}
+  #bar3d button{border:1px solid rgba(160,180,205,.3); background:rgba(23,30,40,.9); color:#eaf0f7;
+        border-radius:9px; padding:7px 11px; cursor:pointer; font-size:12.5px; font-family:inherit;
+        display:inline-flex; align-items:center; gap:5px; backdrop-filter:blur(6px)}
+  #bar3d button:hover{background:rgba(40,52,68,.95)}
+  #bar3d button.on{background:var(--accent); border-color:var(--accent); color:#0f1319}
+  #bar3d .t3{color:#dbe6f2; font-size:11.5px; margin-inline-start:auto;
+             text-shadow:0 1px 3px rgba(0,0,0,.75)}
+  #pick3{position:absolute; top:56px; inset-inline-end:12px; width:min(300px,86vw);
+         max-height:70vh; overflow:auto; display:none; z-index:3;
+         background:rgba(18,24,32,.95); border:1px solid rgba(160,180,205,.28);
+         border-radius:14px; padding:10px; backdrop-filter:blur(8px);
+         box-shadow:0 18px 44px rgba(0,0,0,.5)}
+  #pick3.show{display:block}
+  #pick3 .fcat{color:#8fa0b4}
+  #pick3 .fgrid button{border:1px solid rgba(160,180,205,.28); background:rgba(30,40,52,.92);
+        color:#eaf0f7; border-radius:8px; padding:7px 3px; cursor:pointer; font-size:11.5px;
+        font-family:inherit; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  #pick3 .fgrid button:hover{background:var(--accent); border-color:var(--accent); color:#0f1319}
+  #sel3d{position:absolute; bottom:calc(12px + env(safe-area-inset-bottom)); inset-inline-start:50%;
+         transform:translateX(50%); display:none; gap:6px; align-items:center; z-index:3;
+         background:rgba(18,24,32,.94); border:1px solid rgba(160,180,205,.28);
+         border-radius:12px; padding:7px 10px; backdrop-filter:blur(8px); color:#eaf0f7;
+         font-size:12.5px; box-shadow:0 14px 34px rgba(0,0,0,.45)}
+  #sel3d.show{display:flex}
+  #sel3d button{border:1px solid rgba(160,180,205,.3); background:rgba(32,42,56,.9); color:#eaf0f7;
+        border-radius:8px; padding:6px 9px; cursor:pointer; font-size:13px; font-family:inherit}
+  #sel3d button:hover{background:var(--accent); border-color:var(--accent); color:#0f1319}
+  #hint3{position:absolute; bottom:calc(12px + env(safe-area-inset-bottom)); inset-inline-start:12px;
+         color:#c9d6e4; font-size:11px; z-index:2; max-width:40%; line-height:1.7;
+         text-shadow:0 1px 4px rgba(0,0,0,.8)}
+  #v3d.picked #hint3{display:none}
+  @media (max-width:860px){
+    #bar3d{gap:5px; padding-inline:8px}
+    #bar3d button{padding:8px 9px; font-size:12px}
+    #bar3d .t3{display:none}
+    #hint3{display:none}
+  }
 </style>
 </head>
 <body>
@@ -241,7 +295,7 @@
   <button class="act" id="btnMenu" title="الأدوات والإعدادات" style="display:none">☰</button>
   <div class="brand">📐 كروكي <small>— مخططات معمارية بالأبعاد</small>
     <span id="verTag" style="font-size:10px;font-weight:700;color:var(--accent);
-      border:1px solid var(--accent);border-radius:6px;padding:1px 5px;margin-inline-start:6px">v3.2 · متعدد</span>
+      border:1px solid var(--accent);border-radius:6px;padding:1px 5px;margin-inline-start:6px">v3.6 · 3D</span>
   </div>
   <div class="sep"></div>
   <button class="tool on" data-tool="select" title="تحديد وتحريك (V)">↖ تحديد</button>
@@ -259,6 +313,7 @@
   <div class="sep"></div>
   <button class="act" id="bTheme" title="تبديل الوضع الليلي/النهاري">🌙 ليلي</button>
   <button class="act" id="bFit" title="ملء الشاشة بالمخطط">⤢ توسيط</button>
+  <button class="act" id="b3Dtop" title="عرض المخطط مجسّماً ثلاثي الأبعاد">🧊 3D</button>
   <button class="act" id="bSample">🏠 مثال منزل</button>
   <button class="act danger" id="bClear">✖ مسح الكل</button>
 </header>
@@ -287,7 +342,7 @@
 
   <aside>
     <div class="hint" style="text-align:center;margin-bottom:8px">
-      كروكي — الإصدار 3.2 (تحديد متعدد • يدعم الجوال واللمس)
+      كروكي — الإصدار 3.6 (المسقط معماري نظيف • الأثاث والمجسّم في العرض ثلاثي الأبعاد)
     </div>
     <h3>إعدادات الرسم</h3>
     <div class="row"><label>سمك الجدار</label><input type="text" inputmode="decimal" id="wt" value="0.20" step="0.05" min="0.05"><span class="hint">م</span></div>
@@ -382,6 +437,19 @@
     <div class="row"><label>الاسم</label><input type="text" id="rn" placeholder="غرفة نوم"></div>
     <button class="act btn-wide" id="bAddRoom">➕ إضافة الغرفة للمخطط</button>
 
+    <h3>🛋️ الأثاث والمجسّم</h3>
+    <div class="row"><label>ارتفاع الجدار</label>
+      <input type="text" inputmode="decimal" id="wh" value="3.00" step="0.1"><span class="hint">م</span></div>
+    <button class="act btn-wide" id="b3D">🧊 عرض ثلاثي الأبعاد</button>
+    <div class="hint">الأثاث يُضاف ويُحرّك داخل العرض ثلاثي الأبعاد — المخطط يبقى مخططاً معمارياً نظيفاً.</div>
+    <label class="chk"><input type="checkbox" id="showFurn"> إظهار الأثاث على المسقط أيضاً</label>
+    <div id="furn2d" style="display:none">
+      <label class="chk"><input type="checkbox" id="furnSnap" checked> إلصاق القطعة بأقرب جدار</label>
+      <div id="furnCats"></div>
+      <div class="hint">اختر قطعة ثم انقر داخل الغرفة لوضعها · اسحبها لتحريكها ·
+        اسحب النقطة الزرقاء أمامها لتدويرها.</div>
+    </div>
+
     <h3>خصائص المحدد</h3>
     <div id="props"><div class="hint">لم يتم تحديد أي عنصر. استخدم أداة «تحديد» واضغط على جدار أو باب أو نص.</div></div>
 
@@ -460,11 +528,34 @@
     <h3>اختصارات</h3>
     <div class="hint">
       V تحديد · W جدار · R غرفة · D باب · N نافذة · M قياس · T نص<br>
+      Q و E لتدوير قطعة الأثاث المحددة · Ctrl+A تحديد الكل<br>
       أثناء الرسم: اكتب رقماً ثم Enter لتحديد الطول بدقة.<br>
       نقرتان داخل أي غرفة = تسميتها فوراً.<br>
-      Esc لإنهاء السلسلة · عجلة الماوس للتكبير · زر الماوس الأيمن للتحريك.
+      Esc لإنهاء السلسلة · عجلة الماوس للتكبير · زر الماوس الأيمن للتحريك.<br>
+      في العرض ثلاثي الأبعاد: اسحب للدوران · انقر قطعة ثم اسحبها على الأرض.
     </div>
   </aside>
+</div>
+
+<div id="v3d">
+  <canvas id="cv3"></canvas>
+  <div id="bar3d">
+    <button id="x3d" title="رجوع للمخطط (Esc)">✖ إغلاق</button>
+    <button id="a3d" title="منظور">⬔ منظور</button>
+    <button id="t3dv" title="مسقط علوي مجسّم">⬒ من الأعلى</button>
+    <button id="w3d" title="جولة داخل المنزل">🚶 داخلي</button>
+    <button id="f3d" title="إضافة قطعة أثاث">🛋️ أضف أثاثاً</button>
+    <button id="k3d" title="إظهار/إخفاء الأثاث">👁 الأثاث</button>
+    <button id="d3d" title="أبواب مفتوحة أو مغلقة">🚪 الأبواب</button>
+    <button id="s3d" title="حفظ لقطة PNG">🖼 لقطة</button>
+    <button id="g3d" title="تصدير مجسّم GLB لبرامج ثلاثية الأبعاد">⬇️ GLB</button>
+    <button id="o3d" title="تصدير مجسّم OBJ">⬇️ OBJ</button>
+    <span class="t3" id="i3d"></span>
+  </div>
+  <div id="pick3"></div>
+  <div id="sel3d"></div>
+  <div id="hint3">اسحب للدوران · عجلة الماوس للتقريب · الزر الأيمن للتحريك ·
+    انقر قطعة أثاث لتحديدها ثم اسحبها على الأرض · Q و E للتدوير · Delete للحذف</div>
 </div>
 
 <footer>
@@ -481,7 +572,8 @@
 "use strict";
 
 /* ============================ الحالة والبيانات ============================ */
-var doc = { walls:[], ops:[], texts:[], dims:[], north:0, rot:0, img:null, seq:1 };
+var doc = { walls:[], ops:[], texts:[], dims:[], furn:[], wallH:3.0,
+            north:0, rot:0, img:null, seq:1 };
 var imgEl=null;
 var view = { ox:0, oy:0, ppm:70 };     // بكسل لكل متر
 var tool = 'select';
@@ -1189,6 +1281,7 @@ function drawScene(c,v,W,H,opt){
   drawImage_(c,v,opt);
   drawWalls(c,v);
   drawOps(c,v);
+  drawFurn(c,v);
   drawRooms(c,v);
   drawDims(c,v);
   drawAutoDims(c,v);
@@ -1240,13 +1333,14 @@ function arCount(n, one, two, few, many){
   return n+' '+many;
 }
 function mselCounts(){
-  var c={wall:0, op:0, text:0, dim:0};
+  var c={wall:0, op:0, text:0, dim:0, furn:0};
   msel.forEach(function(x){ if(c[x.t]!==undefined) c[x.t]++; });
   var a=[];
   if(c.wall) a.push(arCount(c.wall,'جدار واحد','جداران','جدران','جداراً'));
   if(c.op)   a.push(arCount(c.op,'فتحة واحدة','فتحتان','فتحات','فتحة'));
   if(c.text) a.push(arCount(c.text,'نص واحد','نصّان','نصوص','نصاً'));
   if(c.dim)  a.push(arCount(c.dim,'خط قياس','خطا قياس','خطوط قياس','خط قياس'));
+  if(c.furn) a.push(arCount(c.furn,'قطعة أثاث','قطعتا أثاث','قطع أثاث','قطعة أثاث'));
   return a.join(' + ');
 }
 function mselWord(){ return arCount(msel.length,'عنصر واحد','عنصرين','عناصر','عنصراً'); }
@@ -1256,6 +1350,7 @@ function selectAll(){
   doc.walls.forEach(function(w){ msel.push({t:'wall', id:w.id}); });
   doc.texts.forEach(function(t){ msel.push({t:'text', id:t.id}); });
   doc.dims.forEach(function(d){ msel.push({t:'dim', id:d.id}); });
+  (doc.furn||[]).forEach(function(f){ msel.push({t:'furn', id:f.id}); });
   sel = msel.length? msel[0] : null;
   refresh();
   if(msel.length) toast('تم تحديد الكل: '+mselCounts());
@@ -1273,6 +1368,9 @@ function groupDrag(p){
     } else if(sx.t==='text'){
       var t=doc.texts.filter(function(x){ return x.id===sx.id; })[0];
       if(t) items.push({k:'pt', o:t, x:t.x, y:t.y});
+    } else if(sx.t==='furn'){
+      var fo=furnById(sx.id);
+      if(fo) items.push({k:'pt', o:fo, x:fo.x, y:fo.y});
     }
     /* الأبواب والنوافذ تتحرك مع جدرانها تلقائياً */
   });
@@ -1301,6 +1399,9 @@ function selectInBox(A,B,addTo){
   doc.texts.forEach(function(t){
     if(t.x>=R.x0 && t.x<=R.x1 && t.y>=R.y0 && t.y<=R.y1) mselAdd({t:'text', id:t.id});
   });
+  (doc.furn||[]).forEach(function(f){
+    if(f.x>=R.x0 && f.x<=R.x1 && f.y>=R.y0 && f.y<=R.y1) mselAdd({t:'furn', id:f.id});
+  });
   doc.ops.forEach(function(o){
     if(mselHas('wall', o.w)) return;               /* الفتحة تتبع جدارها */
     var w=wallById(o.w); if(!w) return;
@@ -1311,6 +1412,902 @@ function selectInBox(A,B,addTo){
   if(msel.length>1) toast('محدد: '+mselCounts()+' — اسحب أحدها لنقلها كلها، أو Delete للحذف');
 }
 
+/* ============================ مكتبة الأثاث ============================ */
+/* كل قطعة = صناديق: [x, y, z, العرض, العمق, الارتفاع, اللون]
+   x,y مركز الصندوق بالنسبة لمركز القطعة · z ارتفاع قاعدته عن الأرض
+   المحور −y هو «ظهر» القطعة: هو الذي يُلصق بالجدار                        */
+var FC={wd:'#8a6446', wd2:'#a07a55', wh:'#e9edf1', fb:'#5b7f9c', fb2:'#416079',
+        mt:'#9aa5b1', gl:'#a8cde2', gr:'#4f9d69', dk:'#39424e', st:'#c7cfd8',
+        cr:'#d9cdbb', bk:'#2b323b'};
+var FURN=[
+ {k:'bed2', n:'سرير مزدوج', g:'نوم', w:1.60, d:2.05, h:0.95, p:[
+   [0,-1.00,0,1.60,0.09,0.95,FC.wd2],
+   [0,0.02,0,1.58,1.95,0.32,FC.wd],
+   [0,0.06,0.32,1.52,1.88,0.24,FC.wh],
+   [-0.38,-0.72,0.56,0.66,0.34,0.12,FC.fb],
+   [0.38,-0.72,0.56,0.66,0.34,0.12,FC.fb]]},
+ {k:'bed1', n:'سرير مفرد', g:'نوم', w:1.00, d:2.00, h:0.90, p:[
+   [0,-0.97,0,1.00,0.08,0.90,FC.wd2],
+   [0,0.03,0,0.98,1.90,0.30,FC.wd],
+   [0,0.07,0.30,0.92,1.84,0.22,FC.wh],
+   [0,-0.70,0.52,0.62,0.34,0.12,FC.fb]]},
+ {k:'wardrobe', n:'دولاب ملابس', g:'نوم', w:2.00, d:0.60, h:2.20, p:[
+   [0,0,0,2.00,0.60,2.20,FC.wd],
+   [-0.50,0.30,0.05,0.96,0.03,2.10,FC.wd2],
+   [0.50,0.30,0.05,0.96,0.03,2.10,FC.wd2],
+   [-0.04,0.33,1.00,0.04,0.04,0.22,FC.mt],
+   [0.04,0.33,1.00,0.04,0.04,0.22,FC.mt]]},
+ {k:'nightst', n:'كومدينو', g:'نوم', w:0.50, d:0.42, h:0.55, p:[
+   [0,0,0,0.50,0.42,0.55,FC.wd],
+   [0,0.21,0.08,0.44,0.03,0.18,FC.wd2],
+   [0,0.21,0.30,0.44,0.03,0.18,FC.wd2]]},
+ {k:'desk', n:'مكتب', g:'نوم', w:1.40, d:0.70, h:0.75, p:[
+   [0,0,0.70,1.40,0.70,0.05,FC.wd],
+   [-0.66,0,0,0.08,0.68,0.70,FC.wd2],
+   [0.66,0,0,0.08,0.68,0.70,FC.wd2],
+   [0.30,0,0.35,0.70,0.66,0.34,FC.wd2]]},
+
+ {k:'sofa3', n:'كنبة 3 مقاعد', g:'جلوس', w:2.10, d:0.90, h:0.82, p:[
+   [0,0.06,0,2.10,0.84,0.36,FC.fb],
+   [0,-0.36,0,2.10,0.18,0.82,FC.fb2],
+   [-0.98,0,0.36,0.14,0.90,0.24,FC.fb2],
+   [0.98,0,0.36,0.14,0.90,0.24,FC.fb2],
+   [-0.60,0.10,0.36,0.72,0.70,0.14,FC.fb],
+   [0.00,0.10,0.36,0.72,0.70,0.14,FC.fb],
+   [0.60,0.10,0.36,0.72,0.70,0.14,FC.fb]]},
+ {k:'sofa2', n:'كنبة مقعدين', g:'جلوس', w:1.45, d:0.90, h:0.82, p:[
+   [0,0.06,0,1.45,0.84,0.36,FC.fb],
+   [0,-0.36,0,1.45,0.18,0.82,FC.fb2],
+   [-0.66,0,0.36,0.13,0.90,0.24,FC.fb2],
+   [0.66,0,0.36,0.13,0.90,0.24,FC.fb2],
+   [-0.34,0.10,0.36,0.62,0.70,0.14,FC.fb],
+   [0.34,0.10,0.36,0.62,0.70,0.14,FC.fb]]},
+ {k:'armchair', n:'كرسي مفرد', g:'جلوس', w:0.85, d:0.85, h:0.82, p:[
+   [0,0.05,0,0.85,0.80,0.36,FC.fb],
+   [0,-0.34,0,0.85,0.17,0.82,FC.fb2],
+   [-0.36,0,0.36,0.13,0.85,0.24,FC.fb2],
+   [0.36,0,0.36,0.13,0.85,0.24,FC.fb2],
+   [0,0.08,0.36,0.58,0.62,0.14,FC.fb]]},
+ {k:'tableC', n:'طاولة قهوة', g:'جلوس', w:1.10, d:0.60, h:0.42, p:[
+   [0,0,0.36,1.10,0.60,0.06,FC.wd],
+   [-0.48,-0.24,0,0.07,0.07,0.36,FC.wd2],
+   [0.48,-0.24,0,0.07,0.07,0.36,FC.wd2],
+   [-0.48,0.24,0,0.07,0.07,0.36,FC.wd2],
+   [0.48,0.24,0,0.07,0.07,0.36,FC.wd2]]},
+ {k:'tvstand', n:'طاولة تلفزيون', g:'جلوس', w:1.60, d:0.42, h:0.50, p:[
+   [0,0,0,1.60,0.42,0.50,FC.wd],
+   [0,0.21,0.06,1.50,0.03,0.16,FC.wd2],
+   [0,0.21,0.28,1.50,0.03,0.16,FC.wd2]]},
+ {k:'tv', n:'شاشة تلفزيون', g:'جلوس', w:1.30, d:0.10, h:0.82, p:[
+   [0,0,0.10,1.30,0.06,0.72,FC.bk],
+   [0,0.01,0.12,1.22,0.02,0.66,FC.dk],
+   [0,0,0,0.40,0.20,0.10,FC.dk]]},
+ {k:'rug', n:'سجادة', g:'جلوس', w:2.40, d:1.60, h:0.02, p:[
+   [0,0,0,2.40,1.60,0.02,FC.fb],
+   [0,0,0.02,2.10,1.32,0.005,FC.cr]]},
+ {k:'plant', n:'نبتة', g:'جلوس', w:0.55, d:0.55, h:1.30, p:[
+   [0,0,0,0.38,0.38,0.36,FC.cr],
+   [0,0,0.36,0.10,0.10,0.34,FC.wd2],
+   [0,0,0.62,0.55,0.55,0.68,FC.gr]]},
+
+ {k:'tableD', n:'طاولة طعام', g:'طعام', w:1.60, d:0.90, h:0.76, p:[
+   [0,0,0.70,1.60,0.90,0.06,FC.wd],
+   [-0.70,-0.36,0,0.08,0.08,0.70,FC.wd2],
+   [0.70,-0.36,0,0.08,0.08,0.70,FC.wd2],
+   [-0.70,0.36,0,0.08,0.08,0.70,FC.wd2],
+   [0.70,0.36,0,0.08,0.08,0.70,FC.wd2]]},
+ {k:'chair', n:'كرسي', g:'طعام', w:0.46, d:0.48, h:0.90, p:[
+   [0,0,0.42,0.46,0.48,0.05,FC.wd],
+   [0,-0.21,0.47,0.46,0.05,0.43,FC.wd2],
+   [-0.19,-0.19,0,0.05,0.05,0.42,FC.wd2],
+   [0.19,-0.19,0,0.05,0.05,0.42,FC.wd2],
+   [-0.19,0.19,0,0.05,0.05,0.42,FC.wd2],
+   [0.19,0.19,0,0.05,0.05,0.42,FC.wd2]]},
+ {k:'counter', n:'كاونتر مطبخ', g:'طعام', w:1.80, d:0.62, h:0.90, p:[
+   [0,0,0,1.78,0.60,0.86,FC.wh],
+   [0,0,0.86,1.80,0.62,0.04,FC.dk],
+   [-0.45,0.30,0.10,0.82,0.03,0.66,FC.st],
+   [0.45,0.30,0.10,0.82,0.03,0.66,FC.st]]},
+ {k:'sink', n:'حوض مطبخ', g:'طعام', w:0.90, d:0.62, h:0.90, p:[
+   [0,0,0,0.88,0.60,0.86,FC.wh],
+   [0,0,0.86,0.90,0.62,0.04,FC.dk],
+   [0,0.02,0.80,0.56,0.40,0.11,FC.mt],
+   [0,-0.22,0.90,0.05,0.05,0.24,FC.mt]]},
+ {k:'stove', n:'فرن وموقد', g:'طعام', w:0.60, d:0.62, h:0.90, p:[
+   [0,0,0,0.60,0.60,0.86,FC.mt],
+   [0,0,0.86,0.60,0.62,0.04,FC.bk],
+   [0,0.31,0.14,0.52,0.03,0.52,FC.bk],
+   [0,-0.10,0.90,0.46,0.34,0.02,FC.dk]]},
+ {k:'fridge', n:'ثلاجة', g:'طعام', w:0.74, d:0.72, h:1.85, p:[
+   [0,0,0,0.74,0.72,1.85,FC.mt],
+   [0,0.36,0.03,0.70,0.03,1.10,FC.st],
+   [0,0.36,1.16,0.70,0.03,0.66,FC.st],
+   [0.30,0.38,0.85,0.04,0.04,0.30,FC.dk]]},
+
+ {k:'toilet', n:'مرحاض', g:'حمام', w:0.42, d:0.72, h:0.80, p:[
+   [0,-0.29,0,0.38,0.16,0.80,FC.wh],
+   [0,0.06,0,0.36,0.52,0.40,FC.wh],
+   [0,0.06,0.40,0.40,0.56,0.05,FC.st]]},
+ {k:'basin', n:'مغسلة', g:'حمام', w:0.60, d:0.48, h:0.88, p:[
+   [0,0,0,0.26,0.26,0.72,FC.wh],
+   [0,0,0.72,0.60,0.48,0.16,FC.wh],
+   [0,0.02,0.80,0.42,0.30,0.08,FC.st],
+   [0,-0.20,0.88,0.05,0.05,0.18,FC.mt]]},
+ {k:'shower', n:'كابينة دش', g:'حمام', w:0.90, d:0.90, h:2.00, p:[
+   [0,0,0,0.90,0.90,0.10,FC.st],
+   [0.44,0,0.10,0.03,0.90,1.90,FC.gl],
+   [0,0.44,0.10,0.90,0.03,1.90,FC.gl],
+   [0,-0.30,1.90,0.22,0.22,0.08,FC.mt]]},
+ {k:'bath', n:'بانيو', g:'حمام', w:1.70, d:0.76, h:0.56, p:[
+   [0,0,0,1.70,0.76,0.56,FC.wh],
+   [0,0,0.46,1.54,0.62,0.11,FC.gl],
+   [-0.78,0,0.56,0.06,0.06,0.18,FC.mt]]},
+
+ {k:'stairs', n:'درج', g:'أخرى', w:1.10, d:2.60, h:1.80, p:[]},
+ {k:'car', n:'سيارة', g:'أخرى', w:1.85, d:4.50, h:1.50, p:[
+   [0,0,0.28,1.80,4.40,0.62,FC.fb2],
+   [0,-0.20,0.90,1.60,2.20,0.58,FC.gl],
+   [-0.86,-1.45,0,0.22,0.68,0.66,FC.bk],
+   [0.86,-1.45,0,0.22,0.68,0.66,FC.bk],
+   [-0.86,1.45,0,0.22,0.68,0.66,FC.bk],
+   [0.86,1.45,0,0.22,0.68,0.66,FC.bk]]},
+ {k:'box', n:'صندوق حر', g:'أخرى', w:1.00, d:1.00, h:1.00, p:[
+   [0,0,0,1.00,1.00,1.00,FC.wd]]}
+];
+/* الدرج يُبنى بالحساب */
+(function(){
+  var st=FURN.filter(function(f){ return f.k==='stairs'; })[0], N=12, i;
+  for(i=0;i<N;i++){
+    var hh=(i+1)*(1.80/N), dd=2.60/N;
+    st.p.push([0, 1.30-dd*(i+0.5), 0, 1.10, dd, hh, i%2? FC.st:FC.wd]);
+  }
+})();
+var FBYK={}; FURN.forEach(function(f){ FBYK[f.k]=f; });
+function furnDef(k){ return FBYK[k]||FBYK.box; }
+function furnName(f){ return (f&&f.nm) || furnDef(f&&f.k).n; }
+/* أجزاء القطعة بمقاسها الحالي */
+function furnParts(f){
+  var D=furnDef(f.k);
+  var sx=(f.w||D.w)/D.w, sy=(f.d||D.d)/D.d, sz=(f.h||D.h)/D.h;
+  return D.p.map(function(q){
+    return {x:q[0]*sx, y:q[1]*sy, z:q[2]*sz,
+            w:q[3]*sx, d:q[4]*sy, h:q[5]*sz,
+            c:(f.c && q[6]!==FC.gl)? f.c : q[6]};
+  });
+}
+function furnAt(k, x, y){
+  var D=furnDef(k);
+  return {id:nid(), k:k, x:x, y:y, rot:0, w:D.w, d:D.d, h:D.h, c:null};
+}
+/* تحويل نقطة محلية إلى العالم */
+function fLocal(f, lx, ly){
+  var a=(f.rot||0)*Math.PI/180, ca=Math.cos(a), sa=Math.sin(a);
+  return {x:f.x + lx*ca - ly*sa, y:f.y + lx*sa + ly*ca};
+}
+function fCorners(f, w, d, cx, cy){
+  cx=cx||0; cy=cy||0;
+  return [fLocal(f,cx-w/2,cy-d/2), fLocal(f,cx+w/2,cy-d/2),
+          fLocal(f,cx+w/2,cy+d/2), fLocal(f,cx-w/2,cy+d/2)];
+}
+function furnById(id){
+  for(var i=0;i<doc.furn.length;i++) if(doc.furn[i].id===id) return doc.furn[i];
+  return null;
+}
+/* هل النقطة داخل قدم القطعة؟ */
+function inFurn(p, f){
+  var a=(f.rot||0)*Math.PI/180, ca=Math.cos(a), sa=Math.sin(a);
+  var dx=p.x-f.x, dy=p.y-f.y;
+  var lx=dx*ca + dy*sa, ly=-dx*sa + dy*ca;
+  return Math.abs(lx)<=f.w/2 && Math.abs(ly)<=f.d/2;
+}
+function furnHit(p){
+  for(var i=doc.furn.length-1;i>=0;i--) if(inFurn(p, doc.furn[i])) return doc.furn[i];
+  return null;
+}
+/* إلصاق القطعة بأقرب جدار: الظهر إلى الجدار */
+function snapToWall(f){
+  var best=null, bd=1.8;
+  doc.walls.forEach(function(w){
+    var r=distSeg({x:f.x,y:f.y}, w.a, w.b);
+    if(r.d<bd){ bd=r.d; best={w:w, r:r}; }
+  });
+  if(!best) return false;
+  var w=best.w, g=wallGeom(w);
+  var sd=sideOf({x:f.x,y:f.y}, w);
+  f.rot=Math.atan2(-g.n.x*sd, g.n.y*sd)*180/Math.PI;
+  var q=best.r.q || {x:f.x,y:f.y};
+  var off=w.t/2 + f.d/2;
+  f.x=q.x + g.n.x*sd*off;
+  f.y=q.y + g.n.y*sd*off;
+  return true;
+}
+
+/* ============================ رسم الأثاث (مسقط أفقي) ============================ */
+function drawFurn(c,v){
+  if(!doc.furn || !doc.furn.length) return;
+  if($('showFurn') && !on('showFurn')) return;
+  doc.furn.forEach(function(f){
+    var parts=furnParts(f).slice().sort(function(A,B){ return (A.z+A.h)-(B.z+B.h); });
+    parts.forEach(function(q){
+      polyPath(c, fCorners(f, q.w, q.d, q.x, q.y), v);
+      c.fillStyle=q.c; c.fill();
+      c.strokeStyle='rgba(20,26,34,.45)'; c.lineWidth=0.9*K(v); c.stroke();
+    });
+    if(selShow('furn', f.id)){
+      polyPath(c, fCorners(f, f.w, f.d), v);
+      c.strokeStyle=P('blue'); c.lineWidth=2.4*K(v); c.stroke();
+      /* مقبض التدوير */
+      if(sel && sel.t==='furn' && sel.id===f.id && !EXPORTING){
+        var hp=furnHandle(f), hs=toScrV(v,hp), cs=toScrV(v,{x:f.x,y:f.y});
+        c.beginPath(); c.moveTo(cs.x,cs.y); c.lineTo(hs.x,hs.y);
+        c.strokeStyle=P('blue'); c.lineWidth=1.2; c.setLineDash([4,3]); c.stroke(); c.setLineDash([]);
+        c.beginPath(); c.arc(hs.x,hs.y,7,0,6.284);
+        c.fillStyle=P('blue'); c.fill();
+        c.strokeStyle='#fff'; c.lineWidth=1.6; c.stroke();
+      }
+    }
+  });
+}
+/* موضع مقبض التدوير (أمام القطعة) */
+function furnHandle(f){
+  return fLocal(f, 0, f.d/2 + Math.max(0.35, 26/view.ppm));
+}
+
+/* ============================ العرض ثلاثي الأبعاد ============================ */
+var v3on=false, sc3=null, cv3=null, cx3=null, sel3=null, drag3=null, walk3=false;
+var cam3={tx:0, ty:0, tz:1.2, yaw:-2.2, pitch:0.62, dist:26};
+var doorOpen3=true;               /* أوراق الأبواب مفتوحة (45°) أو مغلقة */
+var furn3=true;                   /* إظهار الأثاث داخل المجسّم (مستقل عن المسقط) */
+var p3s={}, p3n=0, pz3=null;
+
+function scene3dDirty(){ sc3=null; if(v3on) draw3d(); }
+
+/* --- أدوات متجهات --- */
+function v3sub(a,b){ return {x:a.x-b.x, y:a.y-b.y, z:a.z-b.z}; }
+function v3dot(a,b){ return a.x*b.x + a.y*b.y + a.z*b.z; }
+function v3cross(a,b){ return {x:a.y*b.z-a.z*b.y, y:a.z*b.x-a.x*b.z, z:a.x*b.y-a.y*b.x}; }
+function v3norm(a){ var l=Math.hypot(a.x,a.y,a.z)||1; return {x:a.x/l, y:a.y/l, z:a.z/l}; }
+function cam3pos(){
+  var cp=Math.cos(cam3.pitch), sp=Math.sin(cam3.pitch);
+  return {x:cam3.tx + cp*Math.cos(cam3.yaw)*cam3.dist,
+          y:cam3.ty + cp*Math.sin(cam3.yaw)*cam3.dist,
+          z:cam3.tz + sp*cam3.dist};
+}
+function cam3basis(){
+  var e=cam3pos();
+  var f=v3norm({x:cam3.tx-e.x, y:cam3.ty-e.y, z:cam3.tz-e.z});
+  var r=v3norm({x:f.y, y:-f.x, z:0});
+  if(!isFinite(r.x)||(!r.x&&!r.y)) r={x:1,y:0,z:0};
+  var u=v3cross(r,f);
+  return {e:e, f:f, r:r, u:u};
+}
+
+/* --- بناء المشهد --- */
+function hex2rgb(h){
+  h=String(h||'#888').replace('#','');
+  if(h.length===3) h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+  var v=parseInt(h,16);
+  return [(v>>16)&255, (v>>8)&255, v&255];
+}
+function faceNormal(p, ref){
+  var a={x:p[0][0],y:p[0][1],z:p[0][2]}, b={x:p[1][0],y:p[1][1],z:p[1][2]}, c={x:p[2][0],y:p[2][1],z:p[2][2]};
+  var n=v3norm(v3cross(v3sub(b,a), v3sub(c,a)));
+  if(ref){
+    var ctr={x:0,y:0,z:0};
+    p.forEach(function(q){ ctr.x+=q[0]/p.length; ctr.y+=q[1]/p.length; ctr.z+=q[2]/p.length; });
+    if(v3dot(n, v3sub(ctr, ref))<0) n={x:-n.x,y:-n.y,z:-n.z};
+  }
+  return [n.x,n.y,n.z];
+}
+/* صندوق مُدار حول المحور الرأسي.
+   يستقبل إحداثيات المخطط (ص للأسفل) ويبنيها في نظام المجسّم (ص للشمال) */
+function pushBox3(out, cx, cyP, z0, w, d, h, angP, col, alp, id){
+  if(w<=0||d<=0||h<=0) return;
+  var cy=-cyP, ang=-angP;
+  var ca=Math.cos(ang), sa=Math.sin(ang), hw=w/2, hd=d/2, z1=z0+h;
+  function V(lx,ly,lz){ return [cx+lx*ca-ly*sa, cy+lx*sa+ly*ca, lz]; }
+  var b=[V(-hw,-hd,z0), V(hw,-hd,z0), V(hw,hd,z0), V(-hw,hd,z0)];
+  var t=[V(-hw,-hd,z1), V(hw,-hd,z1), V(hw,hd,z1), V(-hw,hd,z1)];
+  var ref={x:cx, y:cy, z:z0+h/2};
+  var qs=[[t[0],t[1],t[2],t[3]], [b[0],b[1],b[2],b[3]],
+          [b[0],b[1],t[1],t[0]], [b[2],b[3],t[3],t[2]],
+          [b[1],b[2],t[2],t[1]], [b[3],b[0],t[0],t[3]]];
+  qs.forEach(function(q){
+    out.push({p:q, n:faceNormal(q, ref), c:col, a:alp===undefined?1:alp, id:id||null, L:2});
+  });
+}
+function pushPoly3(out, pts, z, col, alp, layer){
+  if(pts.length<3) return;
+  var q=pts.map(function(p){ return [p.x, -p.y, z]; });
+  out.push({p:q, n:[0,0,1], c:col, a:alp===undefined?1:alp, ds:true, L:(layer===undefined?1:layer)});
+}
+/* جدار ممتد: تُقطَّع أوجهه الطويلة حتى يصح ترتيب الرسم، بلا فواصل داخلية */
+function pushWall3(out, w, s0, e0, z0, h, col){
+  if(e0-s0<=0.004 || h<=0) return;
+  var g=wallGeom(w), ht=w.t/2, z1=z0+h;
+  var N=Math.max(1, Math.ceil((e0-s0)/1.5));
+  function pt(d, sg, z){
+    var q=ptOn(w,d);
+    return [q.x+g.n.x*ht*sg, -(q.y+g.n.y*ht*sg), z];
+  }
+  for(var k=0;k<N;k++){
+    var d0=s0+(e0-s0)*k/N, d1=s0+(e0-s0)*(k+1)/N;
+    out.push({p:[pt(d0,1,z0), pt(d1,1,z0), pt(d1,1,z1), pt(d0,1,z1)],
+              n:[g.n.x, -g.n.y, 0], c:col, a:1, L:2});
+    out.push({p:[pt(d0,-1,z0), pt(d1,-1,z0), pt(d1,-1,z1), pt(d0,-1,z1)],
+              n:[-g.n.x, g.n.y, 0], c:col, a:1, L:2});
+    out.push({p:[pt(d0,-1,z1), pt(d1,-1,z1), pt(d1,1,z1), pt(d0,1,z1)],
+              n:[0,0,1], c:col, a:1, L:2});
+  }
+  out.push({p:[pt(s0,-1,z0), pt(s0,1,z0), pt(s0,1,z1), pt(s0,-1,z1)],
+            n:[-g.u.x, g.u.y, 0], c:col, a:1, L:2});
+  out.push({p:[pt(e0,-1,z0), pt(e0,1,z0), pt(e0,1,z1), pt(e0,-1,z1)],
+            n:[g.u.x, -g.u.y, 0], c:col, a:1, L:2});
+}
+function build3d(){
+  var F=[], WH=Math.max(1.6, doc.wallH||3);
+  var dTop=Math.min(WH-0.05, 2.10);          /* أعلى الباب */
+  var wLow=Math.min(WH-0.4, 0.90);           /* جلسة النافذة */
+  var wTop=Math.min(WH-0.05, 2.20);          /* أعلى النافذة */
+  var showF=furn3;
+
+  /* الأرض العامة */
+  var b=bbox();
+  if(isFinite(b.x0)){
+    var m=Math.max(3, Math.max(b.x1-b.x0, b.y1-b.y0)*0.18);
+    pushPoly3(F, [{x:b.x0-m,y:b.y0-m},{x:b.x1+m,y:b.y0-m},{x:b.x1+m,y:b.y1+m},{x:b.x0-m,y:b.y1+m}],
+              -0.03, '#8d9a86', 1, 0);
+  }
+  /* أرضيات الغرف */
+  detectRooms().forEach(function(r){ pushPoly3(F, r.pts, 0.012, '#d5cec3', 1, 1); });
+
+  /* الجدران */
+  doc.walls.forEach(function(w){
+    var g=wallGeom(w), ang=Math.atan2(g.u.y, g.u.x);
+    solidSegs(w).forEach(function(sg){ pushWall3(F, w, sg[0], sg[1], 0, WH, '#dee3e9'); });
+    opsOf(w.id).forEach(function(o){
+      var c0=ptOn(w, o.d);
+      var s1=o.d-o.width/2, e1=o.d+o.width/2;
+      if(o.t==='door'){
+        if(WH>dTop+0.02) pushWall3(F, w, s1, e1, dTop, WH-dTop, '#dee3e9');
+        /* حلق الباب */
+        var jt=Math.min(0.06, o.width*0.09);
+        pushBox3(F, ptOn(w,s1+jt/2).x, ptOn(w,s1+jt/2).y, 0, jt, w.t*1.02, dTop, ang, '#c3b49c');
+        pushBox3(F, ptOn(w,e1-jt/2).x, ptOn(w,e1-jt/2).y, 0, jt, w.t*1.02, dTop, ang, '#c3b49c');
+        pushBox3(F, c0.x, c0.y, dTop-jt, o.width, w.t*1.02, jt, ang, '#c3b49c');
+        /* ورقة الباب — بنفس اتجاه القوس في المسقط، بزاوية موحّدة لكل الأبواب */
+        var sd=(o.side||1), th=doorOpen3? sd*45*Math.PI/180 : 0;
+        var dx=g.u.x*Math.cos(th)-g.u.y*Math.sin(th);
+        var dy=g.u.x*Math.sin(th)+g.u.y*Math.cos(th);
+        var hg=ptOn(w, s1+jt);                       /* المفصلة عند الحلق */
+        var lw=Math.max(0.35, o.width-2*jt), lt=0.05, lh=dTop-0.05;
+        var lc={x:hg.x+dx*lw/2, y:hg.y+dy*lw/2};
+        var la=Math.atan2(dy,dx);
+        pushBox3(F, lc.x, lc.y, 0.02, lw, lt, lh, la, '#96704b');
+        /* حشوة بارزة على وجهَي الباب حتى يُقرأ باباً من أي زاوية */
+        var nx=-dy, ny=dx;
+        [1,-1].forEach(function(sg){
+          pushBox3(F, lc.x+nx*sg*(lt/2+0.006), lc.y+ny*sg*(lt/2+0.006),
+                   0.22, lw-0.14, 0.012, lh-0.40, la, '#a8825b');
+        });
+        /* المقبض على الوجهين */
+        var hp={x:hg.x+dx*(lw-0.09), y:hg.y+dy*(lw-0.09)};
+        [1,-1].forEach(function(sg){
+          pushBox3(F, hp.x+nx*sg*0.05, hp.y+ny*sg*0.05, 1.00, 0.10, 0.06, 0.035, la, '#c3ccd6');
+        });
+      } else {
+        pushWall3(F, w, s1, e1, 0, wLow, '#dee3e9');
+        if(WH>wTop+0.02) pushWall3(F, w, s1, e1, wTop, WH-wTop, '#dee3e9');
+        pushBox3(F, c0.x, c0.y, wLow, o.width, w.t*0.3, wTop-wLow, ang, '#a8cde2', 0.42);
+        /* إطار النافذة */
+        var ft=w.t*0.34, fb=0.06;
+        pushBox3(F, c0.x, c0.y, wLow, o.width, ft, fb, ang, '#eef1f5');
+        pushBox3(F, c0.x, c0.y, wTop-fb, o.width, ft, fb, ang, '#eef1f5');
+        pushBox3(F, ptOn(w,s1+fb/2).x, ptOn(w,s1+fb/2).y, wLow, fb, ft, wTop-wLow, ang, '#eef1f5');
+        pushBox3(F, ptOn(w,e1-fb/2).x, ptOn(w,e1-fb/2).y, wLow, fb, ft, wTop-wLow, ang, '#eef1f5');
+        if(o.width>1.0)
+          pushBox3(F, c0.x, c0.y, wLow, fb*0.8, ft, wTop-wLow, ang, '#eef1f5');
+      }
+    });
+  });
+
+  /* الأثاث */
+  if(showF) (doc.furn||[]).forEach(function(f){
+    var ang=(f.rot||0)*Math.PI/180;
+    furnParts(f).forEach(function(q){
+      var wp=fLocal(f, q.x, q.y);
+      pushBox3(F, wp.x, wp.y, q.z, q.w, q.d, q.h, ang, q.c, (q.c===FC.gl? 0.45:1), f.id);
+    });
+  });
+  return {f:F};
+}
+
+/* --- الرسم --- */
+function draw3d(){
+  if(!cv3) return;
+  var W=cv3.clientWidth||1, H=cv3.clientHeight||1, dpr=window.devicePixelRatio||1;
+  if(cv3.width!==Math.round(W*dpr) || cv3.height!==Math.round(H*dpr)){
+    cv3.width=Math.round(W*dpr); cv3.height=Math.round(H*dpr);
+  }
+  var g=cx3;
+  g.setTransform(dpr,0,0,dpr,0,0);
+  var sky=g.createLinearGradient(0,0,0,H);
+  if(THEME==='dark'){ sky.addColorStop(0,'#16202c'); sky.addColorStop(1,'#0c1117'); }
+  else { sky.addColorStop(0,'#cfe2f3'); sky.addColorStop(1,'#eef3f8'); }
+  g.fillStyle=sky; g.fillRect(0,0,W,H);
+
+  if(!sc3) sc3=build3d();
+  var B=cam3basis(), e=B.e;
+  var fpx=(H/2)/Math.tan(27*Math.PI/180);
+  var LT=v3norm({x:-0.40, y:0.52, z:0.76});      /* ضوء رئيسي */
+  var LT2=v3norm({x:0.55, y:-0.45, z:0.30});     /* ضوء ملطّف للواجهات المظللة */
+  var near=0.06, list=[];
+
+  sc3.f.forEach(function(F){
+    var n={x:F.n[0], y:F.n[1], z:F.n[2]};
+    var c0={x:0,y:0,z:0}, i;
+    for(i=0;i<F.p.length;i++){ c0.x+=F.p[i][0]/F.p.length; c0.y+=F.p[i][1]/F.p.length; c0.z+=F.p[i][2]/F.p.length; }
+    var away=v3dot(n, v3sub(c0, e));
+    if(!F.ds && F.a>=1 && away>0) return;              /* استبعاد الأوجه الخلفية */
+    if(F.ds && away>0) n={x:-n.x,y:-n.y,z:-n.z};
+    /* إلى فضاء الكاميرا */
+    var cp=[], zsum=0, ok=false;
+    for(i=0;i<F.p.length;i++){
+      var d={x:F.p[i][0]-e.x, y:F.p[i][1]-e.y, z:F.p[i][2]-e.z};
+      var X=v3dot(d,B.r), Y=v3dot(d,B.u), Z=v3dot(d,B.f);
+      cp.push([X,Y,Z]); zsum+=Z; if(Z>near) ok=true;
+    }
+    if(!ok) return;
+    /* قص عند المستوى القريب */
+    var poly=[];
+    for(i=0;i<cp.length;i++){
+      var A=cp[i], Bv=cp[(i+1)%cp.length];
+      var ain=A[2]>near, bin=Bv[2]>near;
+      if(ain) poly.push(A);
+      if(ain!==bin){
+        var t=(near-A[2])/((Bv[2]-A[2])||1e-9);
+        poly.push([A[0]+(Bv[0]-A[0])*t, A[1]+(Bv[1]-A[1])*t, near]);
+      }
+    }
+    if(poly.length<3) return;
+    var pts=poly.map(function(q){ return [W/2 + q[0]*fpx/q[2], H/2 - q[1]*fpx/q[2]]; });
+    var lit=0.46 + 0.44*Math.max(0, v3dot(n, LT)) + 0.14*Math.max(0, v3dot(n, LT2));
+    if(n.z>0.85) lit=Math.min(1.12, lit+0.08);
+    var rgb=hex2rgb(F.c);
+    var col='rgb('+Math.min(255,rgb[0]*lit|0)+','+Math.min(255,rgb[1]*lit|0)+','+Math.min(255,rgb[2]*lit|0)+')';
+    list.push({z:zsum/F.p.length, pts:pts, col:col, a:F.a, id:F.id, L:(F.L===undefined?2:F.L)});
+  });
+
+  list.sort(function(A,Bb){
+    if(A.L!==Bb.L) return A.L-Bb.L;      /* الأرض ثم الأرضيات ثم القائم */
+    return Bb.z-A.z;
+  });
+  list.forEach(function(o){
+    g.beginPath();
+    g.moveTo(o.pts[0][0], o.pts[0][1]);
+    for(var i=1;i<o.pts.length;i++) g.lineTo(o.pts[i][0], o.pts[i][1]);
+    g.closePath();
+    g.globalAlpha=o.a; g.fillStyle=o.col; g.fill();
+    if(o.a>=1){ g.strokeStyle='rgba(15,20,28,.16)'; g.lineWidth=0.8; g.stroke(); }
+    g.globalAlpha=1;
+  });
+
+  /* إبراز القطعة المحددة */
+  if(sel3){
+    var f=furnById(sel3);
+    if(f){
+      var ang=-(f.rot||0)*Math.PI/180, ca=Math.cos(ang), sa=Math.sin(ang);
+      function VV(lx,ly,lz){ return {x:f.x+lx*ca-ly*sa, y:-f.y+lx*sa+ly*ca, z:lz}; }
+      var hw=f.w/2, hd=f.d/2, hh=f.h;
+      var C=[VV(-hw,-hd,0),VV(hw,-hd,0),VV(hw,hd,0),VV(-hw,hd,0),
+             VV(-hw,-hd,hh),VV(hw,-hd,hh),VV(hw,hd,hh),VV(-hw,hd,hh)];
+      var E=[[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
+      g.strokeStyle='#4d9dff'; g.lineWidth=2.2;
+      E.forEach(function(ed){
+        var s1=prj3(C[ed[0]], B, fpx, W, H), s2=prj3(C[ed[1]], B, fpx, W, H);
+        if(!s1||!s2) return;
+        g.beginPath(); g.moveTo(s1[0],s1[1]); g.lineTo(s2[0],s2[1]); g.stroke();
+      });
+    } else sel3=null;
+  }
+  drawCompass3(g, B, W, H);
+  var inf=$('i3d');
+  if(inf) inf.textContent=doc.walls.length+' جدار · '+(doc.furn||[]).length+' قطعة أثاث · ارتفاع '+fmt(doc.wallH||3)+' م';
+}
+/* بوصلة صغيرة: تدل على الشمال كما هو معرّف في المخطط */
+function drawCompass3(g, B, W, H){
+  var an=(doc.north||0)*Math.PI/180;
+  var n3={x:Math.sin(an), y:Math.cos(an), z:0};      /* الشمال في نظام المجسّم */
+  var sx=v3dot(n3,B.r), sy=-v3dot(n3,B.u);
+  var L=Math.hypot(sx,sy);
+  if(L<1e-4){ sx=0; sy=-1; L=1; }
+  sx/=L; sy/=L;
+  var R=26, cx=R+26, cy=H-R-34;
+  g.save();
+  g.beginPath(); g.arc(cx,cy,R,0,6.2832);
+  g.fillStyle='rgba(16,22,30,.72)'; g.fill();
+  g.strokeStyle='rgba(190,205,222,.5)'; g.lineWidth=1.3; g.stroke();
+  g.beginPath();
+  g.moveTo(cx+sx*R*0.78, cy+sy*R*0.78);
+  g.lineTo(cx-sy*R*0.30 - sx*R*0.28, cy+sx*R*0.30 - sy*R*0.28);
+  g.lineTo(cx+sy*R*0.30 - sx*R*0.28, cy-sx*R*0.30 - sy*R*0.28);
+  g.closePath();
+  g.fillStyle='#e0554f'; g.fill();
+  g.beginPath();
+  g.moveTo(cx-sx*R*0.78, cy-sy*R*0.78);
+  g.lineTo(cx-sy*R*0.22 + sx*R*0.24, cy+sx*R*0.22 + sy*R*0.24);
+  g.lineTo(cx+sy*R*0.22 + sx*R*0.24, cy-sx*R*0.22 + sy*R*0.24);
+  g.closePath();
+  g.fillStyle='rgba(205,218,232,.85)'; g.fill();
+  g.font='700 12px Segoe UI, Tahoma, sans-serif';
+  g.textAlign='center'; g.textBaseline='middle';
+  g.fillStyle='#f0f5fa';
+  g.fillText('ش', cx+sx*(R+13), cy+sy*(R+13));
+  g.restore();
+}
+function prj3(p, B, fpx, W, H){
+  var d=v3sub(p, B.e);
+  var Z=v3dot(d,B.f); if(Z<=0.06) return null;
+  return [W/2 + v3dot(d,B.r)*fpx/Z, H/2 - v3dot(d,B.u)*fpx/Z];
+}
+
+/* --- الأشعة والانتقاء --- */
+function ray3(sx, sy){
+  var W=cv3.clientWidth, H=cv3.clientHeight, B=cam3basis();
+  var fpx=(H/2)/Math.tan(27*Math.PI/180);
+  var X=sx-W/2, Y=-(sy-H/2);
+  var d=v3norm({x:B.f.x*fpx + B.r.x*X + B.u.x*Y,
+                y:B.f.y*fpx + B.r.y*X + B.u.y*Y,
+                z:B.f.z*fpx + B.r.z*X + B.u.z*Y});
+  return {o:B.e, d:d};
+}
+function rayFurn(r){
+  var best=null, bt=1e9;
+  (doc.furn||[]).forEach(function(f){
+    var ang=-(f.rot||0)*Math.PI/180, ca=Math.cos(ang), sa=Math.sin(ang);
+    var ox=r.o.x-f.x, oy=r.o.y+f.y;
+    var lo=[ox*ca+oy*sa, -ox*sa+oy*ca, r.o.z];
+    var ld=[r.d.x*ca+r.d.y*sa, -r.d.x*sa+r.d.y*ca, r.d.z];
+    var mn=[-f.w/2,-f.d/2,0], mx=[f.w/2,f.d/2,f.h];
+    var t0=0.01, t1=1e9, i;
+    for(i=0;i<3;i++){
+      if(Math.abs(ld[i])<1e-9){ if(lo[i]<mn[i]||lo[i]>mx[i]) return; continue; }
+      var a=(mn[i]-lo[i])/ld[i], bq=(mx[i]-lo[i])/ld[i];
+      if(a>bq){ var tmp=a; a=bq; bq=tmp; }
+      if(a>t0) t0=a; if(bq<t1) t1=bq;
+      if(t0>t1) return;
+    }
+    if(t0<bt){ bt=t0; best=f; }
+  });
+  return best? {f:best, t:bt} : null;
+}
+function rayFloor(r, z){
+  z=z||0;
+  if(Math.abs(r.d.z)<1e-6) return null;
+  var t=(z-r.o.z)/r.d.z;
+  if(t<=0) return null;
+  return {x:r.o.x+r.d.x*t, y:-(r.o.y+r.d.y*t)};   /* يُعاد بإحداثيات المخطط */
+}
+
+/* --- فتح وإغلاق --- */
+function fit3d(){
+  var b=bbox();
+  if(!isFinite(b.x0)){ cam3.tx=0; cam3.ty=0; cam3.dist=20; }
+  else {
+    cam3.tx=(b.x0+b.x1)/2; cam3.ty=-(b.y0+b.y1)/2;
+    cam3.dist=Math.max(9, Math.hypot(b.x1-b.x0, b.y1-b.y0)*1.15);
+  }
+  cam3.tz=(doc.wallH||3)*0.45; cam3.yaw=-2.2; cam3.pitch=0.62;
+  walk3=false;
+}
+function open3d(){
+  cv3=$('cv3'); cx3=cv3.getContext('2d');
+  if(!doc.walls.length){ toast('ارسم المخطط أولاً ثم اعرضه مجسّماً'); return; }
+  v3on=true; sc3=null; sel3=null;
+  $('v3d').classList.add('show');
+  fit3d(); sel3Bar(); draw3d();
+  setTimeout(draw3d, 60);
+}
+function close3d(){
+  v3on=false; sel3=null; drag3=null;
+  $('v3d').classList.remove('show');
+  $('pick3').classList.remove('show');
+  render();
+}
+$('b3D').onclick=open3d;
+$('b3Dtop').onclick=open3d;
+$('x3d').onclick=close3d;
+$('a3d').onclick=function(){ fit3d(); draw3d(); };
+$('t3dv').onclick=function(){ cam3.pitch=1.40; cam3.yaw=-Math.PI/2; draw3d(); };
+$('w3d').onclick=function(){
+  walk3=!walk3;
+  $('w3d').classList.toggle('on', walk3);
+  if(walk3){ cam3.tz=1.55; cam3.pitch=0.06; cam3.dist=Math.max(2.2, Math.min(5, cam3.dist*0.18)); }
+  else fit3d();
+  draw3d();
+};
+$('k3d').onclick=function(){
+  furn3=!furn3;
+  $('k3d').classList.toggle('on', !furn3);
+  $('k3d').textContent = furn3? '👁 الأثاث' : '👁 بلا أثاث';
+  scene3dDirty();
+};
+$('d3d').onclick=function(){
+  doorOpen3=!doorOpen3;
+  $('d3d').classList.toggle('on', !doorOpen3);
+  $('d3d').textContent = doorOpen3? '🚪 الأبواب' : '🚪 مغلقة';
+  scene3dDirty();
+  toast(doorOpen3? 'الأبواب مفتوحة' : 'الأبواب مغلقة — كل الأبواب بشكل واحد');
+};
+$('s3d').onclick=function(){
+  draw3d();
+  cv3.toBlob(function(bl){ dl(bl, ($('pname').value||'مخطط')+' - 3D.png'); toast('تم حفظ اللقطة'); });
+};
+
+/* --- شريط القطعة المحددة --- */
+function sel3Bar(){
+  var el=$('sel3d'); if(!el) return;
+  var f=sel3? furnById(sel3):null;
+  if(!f){ el.classList.remove('show'); el.innerHTML=''; $('v3d').classList.remove('picked'); return; }
+  el.classList.add('show'); $('v3d').classList.add('picked');
+  el.innerHTML='<b>'+esc(furnDef(f.k).n)+'</b>'+
+    '<button id="s3L" title="تدوير يسار">⟲</button>'+
+    '<button id="s3R" title="تدوير يمين">⟳</button>'+
+    '<button id="s3W" title="إلصاق بالجدار">🧲</button>'+
+    '<button id="s3D" title="تكرار">⧉</button>'+
+    '<button id="s3X" title="حذف">🗑</button>';
+  $('s3L').onclick=function(){ pushUndo(); f.rot=(((f.rot||0)-15)%360+360)%360; scene3dDirty(); render(); };
+  $('s3R').onclick=function(){ pushUndo(); f.rot=(((f.rot||0)+15)%360+360)%360; scene3dDirty(); render(); };
+  $('s3W').onclick=function(){ pushUndo(); snapToWall(f); scene3dDirty(); render(); };
+  $('s3D').onclick=function(){
+    pushUndo();
+    var cp=JSON.parse(JSON.stringify(f)); cp.id=nid(); cp.x+=0.5; cp.y+=0.5;
+    doc.furn.push(cp); sel3=cp.id; sel={t:'furn', id:cp.id}; mselSet(sel);
+    scene3dDirty(); render(); sel3Bar();
+  };
+  $('s3X').onclick=function(){
+    pushUndo();
+    doc.furn=doc.furn.filter(function(x){ return x.id!==f.id; });
+    sel3=null; sel=null; msel=[]; scene3dDirty(); render(); sel3Bar();
+    toast('تم حذف القطعة');
+  };
+}
+
+/* --- قائمة إضافة الأثاث داخل العرض --- */
+(function(){
+  var host=$('pick3'); if(!host) return;
+  var groups=[], seen={};
+  FURN.forEach(function(f){ if(!seen[f.g]){ seen[f.g]=[]; groups.push(f.g); } seen[f.g].push(f); });
+  var h='';
+  groups.forEach(function(g2){
+    h+='<div class="fcat">'+esc(g2)+'</div><div class="fgrid">';
+    seen[g2].forEach(function(f){ h+='<button data-k="'+f.k+'">'+esc(f.n)+'</button>'; });
+    h+='</div>';
+  });
+  host.innerHTML=h;
+  Array.prototype.forEach.call(host.querySelectorAll('button'), function(bt){
+    bt.onclick=function(){
+      pushUndo();
+      var nf=furnAt(bt.dataset.k, Math.round(cam3.tx*4)/4, Math.round(-cam3.ty*4)/4);
+      if($('furnSnap') && on('furnSnap')) snapToWall(nf);
+      doc.furn.push(nf);
+      sel3=nf.id; sel={t:'furn', id:nf.id}; mselSet(sel);
+      host.classList.remove('show'); $('f3d').classList.remove('on');
+      scene3dDirty(); render(); sel3Bar();
+      toast('تمت إضافة: '+furnDef(nf.k).n+' — اسحبها لمكانها');
+    };
+  });
+})();
+$('f3d').onclick=function(){
+  var h=$('pick3').classList.toggle('show');
+  $('f3d').classList.toggle('on', h);
+};
+
+/* --- تصدير المجسّم --- */
+/* تحويل إلى نظام glTF: (س، ص، ع) ← (س، ع، ص) */
+function tris3(){
+  var sc=build3d(), G={};
+  sc.f.forEach(function(F){
+    if(!F.p || F.p.length<3) return;
+    var g=G[F.c] || (G[F.c]={pos:[], nrm:[]});
+    var n=F.n;
+    for(var i=1;i+1<F.p.length;i++){
+      var tri=[F.p[0], F.p[i], F.p[i+1]];
+      for(var j=0;j<3;j++){
+        g.pos.push(tri[j][0], tri[j][2], -tri[j][1]);
+        g.nrm.push(n[0], n[2], -n[1]);
+      }
+    }
+  });
+  return G;
+}
+function exportGLB(){
+  var G=tris3(), bins=[], bvs=[], accs=[], mats=[], prims=[], off=0, any=false;
+  Object.keys(G).forEach(function(col){
+    var g=G[col], N=g.pos.length/3;
+    if(!N) return;
+    any=true;
+    var pos=new Float32Array(g.pos), nrm=new Float32Array(g.nrm);
+    var mn=[1e30,1e30,1e30], mx=[-1e30,-1e30,-1e30], i, k;
+    for(i=0;i<N;i++) for(k=0;k<3;k++){
+      var val=pos[i*3+k];
+      if(val<mn[k]) mn[k]=val;
+      if(val>mx[k]) mx[k]=val;
+    }
+    bvs.push({buffer:0, byteOffset:off, byteLength:pos.byteLength, target:34962});
+    bins.push(pos); off+=pos.byteLength;
+    bvs.push({buffer:0, byteOffset:off, byteLength:nrm.byteLength, target:34962});
+    bins.push(nrm); off+=nrm.byteLength;
+    accs.push({bufferView:bvs.length-2, componentType:5126, count:N, type:'VEC3', min:mn, max:mx});
+    accs.push({bufferView:bvs.length-1, componentType:5126, count:N, type:'VEC3'});
+    var rgb=hex2rgb(col);
+    mats.push({name:'mat'+mats.length, doubleSided:true,
+      pbrMetallicRoughness:{baseColorFactor:[rgb[0]/255, rgb[1]/255, rgb[2]/255, 1],
+                            metallicFactor:0.03, roughnessFactor:0.85}});
+    prims.push({attributes:{POSITION:accs.length-2, NORMAL:accs.length-1}, material:mats.length-1});
+  });
+  if(!any){ toast('لا يوجد ما يُصدَّر'); return; }
+  var json={asset:{version:'2.0', generator:'Krooki 3D'},
+    scene:0, scenes:[{nodes:[0]}],
+    nodes:[{mesh:0, name:($('pname').value||'krooki')}],
+    meshes:[{name:'plan', primitives:prims}],
+    materials:mats, accessors:accs, bufferViews:bvs, buffers:[{byteLength:off}]};
+  var js=JSON.stringify(json);
+  var jb=new TextEncoder().encode(js);
+  var jpad=(4-(jb.length%4))%4;
+  var bpad=(4-(off%4))%4;
+  var total=12 + 8 + jb.length + jpad + 8 + off + bpad;
+  var buf=new ArrayBuffer(total), dv=new DataView(buf), u8=new Uint8Array(buf), pcur=0;
+  dv.setUint32(0, 0x46546C67, true); dv.setUint32(4, 2, true); dv.setUint32(8, total, true);
+  dv.setUint32(12, jb.length+jpad, true); dv.setUint32(16, 0x4E4F534A, true);
+  u8.set(jb, 20);
+  for(pcur=0;pcur<jpad;pcur++) u8[20+jb.length+pcur]=0x20;
+  var bo=20+jb.length+jpad;
+  dv.setUint32(bo, off+bpad, true); dv.setUint32(bo+4, 0x004E4942, true);
+  var w=bo+8;
+  bins.forEach(function(arr){
+    u8.set(new Uint8Array(arr.buffer, arr.byteOffset, arr.byteLength), w);
+    w+=arr.byteLength;
+  });
+  dl(new Blob([buf],{type:'model/gltf-binary'}), ($('pname').value||'مخطط')+'.glb');
+  toast('تم تصدير المجسّم GLB — يفتح في Blender و3ds Max ومعاينة ويندوز');
+}
+function exportOBJ(){
+  var G=tris3(), V=[], VN=[], FA=[], vi=1, any=false;
+  Object.keys(G).forEach(function(col){
+    var g=G[col], N=g.pos.length/3, i;
+    if(!N) return;
+    any=true;
+    var rgb=hex2rgb(col);
+    var cr=(rgb[0]/255).toFixed(3), cg=(rgb[1]/255).toFixed(3), cb=(rgb[2]/255).toFixed(3);
+    for(i=0;i<N;i++){
+      V.push('v '+g.pos[i*3].toFixed(4)+' '+g.pos[i*3+1].toFixed(4)+' '+g.pos[i*3+2].toFixed(4)
+             +' '+cr+' '+cg+' '+cb);
+      VN.push('vn '+g.nrm[i*3].toFixed(4)+' '+g.nrm[i*3+1].toFixed(4)+' '+g.nrm[i*3+2].toFixed(4));
+    }
+    FA.push('o part_'+col.replace('#',''));
+    for(i=0;i<N;i+=3)
+      FA.push('f '+(vi+i)+'//'+(vi+i)+' '+(vi+i+1)+'//'+(vi+i+1)+' '+(vi+i+2)+'//'+(vi+i+2));
+    vi+=N;
+  });
+  if(!any){ toast('لا يوجد ما يُصدَّر'); return; }
+  var out=['# Krooki 3D — '+($('pname').value||'مخطط'),
+           '# v x y z r g b'].concat(V, VN, FA).join('\n')+'\n';
+  dl(new Blob([out],{type:'text/plain'}), ($('pname').value||'مخطط')+'.obj');
+  toast('تم تصدير المجسّم OBJ');
+}
+$('g3d').onclick=exportGLB;
+$('o3d').onclick=exportOBJ;
+
+/* --- التفاعل --- */
+(function(){
+  var cvv=$('cv3'); if(!cvv) return;
+  function pos3(ev){ var r=cvv.getBoundingClientRect(); return {x:ev.clientX-r.left, y:ev.clientY-r.top}; }
+  function lst3(){ var a=[]; for(var k in p3s) a.push(p3s[k]); return a; }
+  cvv.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+  cvv.addEventListener('pointerdown', function(e){
+    try{ cvv.setPointerCapture(e.pointerId); }catch(err){}
+    var q=pos3(e);
+    if(!p3s[e.pointerId]) p3n++;
+    p3s[e.pointerId]={x:q.x, y:q.y};
+    if(p3n===2){
+      var a=lst3();
+      pz3={d:Math.max(1,Math.hypot(a[0].x-a[1].x, a[0].y-a[1].y)),
+           mx:(a[0].x+a[1].x)/2, my:(a[0].y+a[1].y)/2, dist:cam3.dist, tx:cam3.tx, ty:cam3.ty};
+      drag3=null; return;
+    }
+    if(e.button===1 || e.button===2){ drag3={m:'pan', x:q.x, y:q.y, tx:cam3.tx, ty:cam3.ty}; return; }
+    var r=ray3(q.x, q.y), hit=rayFurn(r);
+    if(hit){
+      sel3=hit.f.id; sel={t:'furn', id:hit.f.id}; mselSet(sel);
+      var fp=rayFloor(r, 0) || {x:hit.f.x, y:hit.f.y};
+      drag3={m:'move', id:hit.f.id, ox:hit.f.x-fp.x, oy:hit.f.y-fp.y, moved:false};
+      sel3Bar(); buildProps(); draw3d();
+      cvv.classList.add('grabbing');
+      return;
+    }
+    if(sel3){ sel3=null; sel3Bar(); }
+    drag3={m:'orb', x:q.x, y:q.y, yaw:cam3.yaw, pitch:cam3.pitch};
+    cvv.classList.add('grabbing');
+  });
+  cvv.addEventListener('pointermove', function(e){
+    var q=pos3(e);
+    if(p3s[e.pointerId]) p3s[e.pointerId]={x:q.x, y:q.y};
+    if(pz3 && p3n>=2){
+      var a=lst3();
+      if(a.length>=2){
+        var d=Math.max(1, Math.hypot(a[0].x-a[1].x, a[0].y-a[1].y));
+        var mx=(a[0].x+a[1].x)/2, my=(a[0].y+a[1].y)/2;
+        cam3.dist=Math.max(1.2, Math.min(400, pz3.dist*(pz3.d/d)));
+        var B=cam3basis();
+        var gr=v3norm({x:B.r.x, y:B.r.y, z:0});
+        var gf=v3norm({x:B.f.x, y:B.f.y, z:0});
+        var k=cam3.dist*0.0026;
+        cam3.tx=pz3.tx - gr.x*(mx-pz3.mx)*k - gf.x*(my-pz3.my)*k;
+        cam3.ty=pz3.ty - gr.y*(mx-pz3.mx)*k - gf.y*(my-pz3.my)*k;
+        draw3d();
+      }
+      return;
+    }
+    if(!drag3) return;
+    if(drag3.m==='orb'){
+      cam3.yaw=drag3.yaw + (q.x-drag3.x)*0.0075;
+      cam3.pitch=Math.max(-1.45, Math.min(1.50, drag3.pitch + (q.y-drag3.y)*0.0065));
+      draw3d();
+    } else if(drag3.m==='pan'){
+      var B2=cam3basis();
+      var gr2=v3norm({x:B2.r.x, y:B2.r.y, z:0});
+      var gf2=v3norm({x:B2.f.x, y:B2.f.y, z:0});
+      var k2=cam3.dist*0.0026;
+      cam3.tx=drag3.tx - gr2.x*(q.x-drag3.x)*k2 - gf2.x*(q.y-drag3.y)*k2;
+      cam3.ty=drag3.ty - gr2.y*(q.x-drag3.x)*k2 - gf2.y*(q.y-drag3.y)*k2;
+      draw3d();
+    } else if(drag3.m==='move'){
+      var f=furnById(drag3.id); if(!f) return;
+      var fp=rayFloor(ray3(q.x,q.y), 0); if(!fp) return;
+      if(!drag3.moved){ pushUndo(); drag3.moved=true; }
+      var nx=fp.x+drag3.ox, ny=fp.y+drag3.oy;
+      var gs=pnum($('gs').value)||0.25;
+      if($('snap') && on('snap')){ nx=Math.round(nx/gs)*gs; ny=Math.round(ny/gs)*gs; }
+      f.x=nx; f.y=ny;
+      sc3=null; draw3d();
+    }
+  });
+  function end3(e){
+    if(p3s[e.pointerId]){ delete p3s[e.pointerId]; p3n=Math.max(0,p3n-1); }
+    if(p3n<2) pz3=null;
+    if(drag3 && drag3.m==='move' && drag3.moved) render();
+    drag3=null;
+    cvv.classList.remove('grabbing');
+  }
+  cvv.addEventListener('pointerup', end3);
+  cvv.addEventListener('pointercancel', end3);
+  cvv.addEventListener('wheel', function(e){
+    e.preventDefault();
+    cam3.dist=Math.max(1.2, Math.min(400, cam3.dist*(e.deltaY<0? 1/1.13 : 1.13)));
+    draw3d();
+  }, {passive:false});
+  window.addEventListener('resize', function(){ if(v3on) draw3d(); });
+  document.addEventListener('keydown', function(e){
+    if(!v3on || dlgOpen) return;
+    var tg=(e.target.tagName||'').toLowerCase();
+    if(tg==='input'||tg==='select'||tg==='textarea') return;
+    if(e.key==='Escape'){ e.preventDefault(); close3d(); return; }
+    var f=sel3? furnById(sel3):null;
+    if(!f) return;
+    if(e.key==='Delete'||e.key==='Backspace'){
+      e.preventDefault(); pushUndo();
+      doc.furn=doc.furn.filter(function(x){ return x.id!==f.id; });
+      sel3=null; sel=null; msel=[]; scene3dDirty(); render(); sel3Bar(); return;
+    }
+    if(e.key==='q'||e.key==='e'||e.key==='ض'||e.key==='ث'){
+      e.preventDefault(); pushUndo();
+      f.rot=(((f.rot||0)+((e.key==='e'||e.key==='ث')?15:-15))%360+360)%360;
+      scene3dDirty(); render();
+    }
+  }, true);
+})();
+
 /* ============================ اختبار الإصابة ============================ */
 function hitTest(p){
   var tol=10/view.ppm;
@@ -1318,6 +2315,8 @@ function hitTest(p){
     var t=doc.texts[i];
     if(Math.abs(t.x-p.x)<0.6 && Math.abs(t.y-p.y)<0.22) return {t:'text', id:t.id};
   }
+  var fh=(!$('showFurn') || on('showFurn'))? furnHit(p) : null;
+  if(fh) return {t:'furn', id:fh.id};
   for(var j=doc.ops.length-1;j>=0;j--){
     var o=doc.ops[j], w=wallById(o.w); if(!w) continue;
     var m=ptOn(w,o.d);
@@ -1379,6 +2378,15 @@ cv.addEventListener('pointerdown', function(e){
     var h=hitTest(p);
     var addSel = (e.ctrlKey || e.metaKey || multiMode);
 
+    /* مقبض تدوير الأثاث */
+    if(!addSel && sel && sel.t==='furn'){
+      var fz=furnById(sel.id);
+      if(fz && len(p, furnHandle(fz)) < 15/view.ppm){
+        pushUndo(); dragging={m:'frot', id:fz.id};
+        return;
+      }
+    }
+
     if(addSel){                       /* Ctrl + نقر (أو وضع «متعدد») = إضافة/إزالة */
       if(h){
         if(mselHas(h.t,h.id)){ mselOff(h); sel = msel.length? msel[msel.length-1] : null; }
@@ -1414,6 +2422,10 @@ cv.addEventListener('pointerdown', function(e){
         else if(db<tolp) dragging={m:'end', id:h.id, e:'b'};
         else dragging={m:'wall', id:h.id, p:p, a:{x:w.a.x,y:w.a.y}, b:{x:w.b.x,y:w.b.y}};
       } else if(h.t==='op'){ dragging={m:'op', id:h.id}; }
+      else if(h.t==='furn'){
+        var fd=furnById(h.id);
+        dragging={m:'furn', id:h.id, p:p, fx:fd?fd.x:0, fy:fd?fd.y:0};
+      }
       else if(h.t==='text'){ dragging={m:'text', id:h.id}; }
       else if(h.t==='dim'){
         var dd=doc.dims.filter(function(x){ return x.id===h.id; })[0];
@@ -1432,6 +2444,18 @@ cv.addEventListener('pointerdown', function(e){
   }
 
   var sp = snapPoint(p);
+
+  if(tool==='furn'){
+    if(!pendingFurn){ setTool('select'); return; }
+    pushUndo();
+    var nf=furnAt(pendingFurn, sp.x, sp.y);
+    if($('furnSnap') && on('furnSnap')) snapToWall(nf);
+    doc.furn.push(nf);
+    sel={t:'furn', id:nf.id}; mselSet(sel);
+    if(!shiftKey){ pendingFurn=null; setTool('select'); markFurnBtn(); }
+    refresh(); scene3dDirty();
+    return;
+  }
 
   if(tool==='wall'){
     if(!draft){ draft={k:'wall', pts:[sp], cur:sp}; }
@@ -1516,6 +2540,23 @@ cv.addEventListener('pointermove', function(e){
         var r=distSeg(p,w3.a,w3.b), L=wallGeom(w3).L;
         o.d=Math.max(o.width/2, Math.min(L-o.width/2, r.t*L));
       }
+    } else if(dragging.m==='furn'){
+      var ff=furnById(dragging.id);
+      if(ff){
+        var fdx=p.x-dragging.p.x, fdy=p.y-dragging.p.y;
+        var fgs=pnum($('gs').value)||0.25;
+        if(on('snap')){ fdx=Math.round(fdx/fgs)*fgs; fdy=Math.round(fdy/fgs)*fgs; }
+        ff.x=dragging.fx+fdx; ff.y=dragging.fy+fdy;
+        scene3dDirty();
+      }
+    } else if(dragging.m==='frot'){
+      var fr=furnById(dragging.id);
+      if(fr){
+        var an=Math.atan2(p.y-fr.y, p.x-fr.x)*180/Math.PI - 90;
+        if(on('snap')||shiftKey) an=Math.round(an/15)*15;
+        fr.rot=((an%360)+360)%360;
+        scene3dDirty();
+      }
     } else if(dragging.m==='group'){
       var gdx=p.x-dragging.p.x, gdy=p.y-dragging.p.y;
       var gg2=pnum($('gs').value)||0.25;
@@ -1526,7 +2567,7 @@ cv.addEventListener('pointermove', function(e){
           it.o.b={x:it.b.x+gdx, y:it.b.y+gdy};
         } else { it.o.x=it.x+gdx; it.o.y=it.y+gdy; }
       });
-      roomCache.key='';
+      roomCache.key=''; scene3dDirty();
     } else if(dragging.m==='img'){
       doc.img.x=dragging.ix+(p.x-dragging.p.x);
       doc.img.y=dragging.iy+(p.y-dragging.p.y);
@@ -1650,7 +2691,7 @@ lenIn.addEventListener('keydown', function(e){
 
 /* ============================ لوحة المفاتيح ============================ */
 document.addEventListener('keydown', function(e){
-  if(dlgOpen) return;
+  if(dlgOpen || v3on) return;          /* العرض ثلاثي الأبعاد له اختصاراته */
   shiftKey=e.shiftKey;
   var tag=(e.target.tagName||'').toLowerCase();
   if(tag==='input'||tag==='select'||tag==='textarea') return;
@@ -1661,6 +2702,12 @@ document.addEventListener('keydown', function(e){
   if(e.key==='Escape'){ draft=null; hideLenBox(); mselClear(); refresh(); return; }
   if(e.key==='Delete'||e.key==='Backspace'){ delSel(); return; }
   if(draft && /^[0-9.]$/.test(e.key)){ showLenBox(); lenIn.value=e.key; e.preventDefault(); return; }
+  if(sel && sel.t==='furn' && (e.key==='q'||e.key==='e'||e.key==='ض'||e.key==='ث')){
+    var fk=furnById(sel.id);
+    if(fk){ pushUndo(); fk.rot=(((fk.rot||0)+((e.key==='e'||e.key==='ث')?15:-15))%360+360)%360;
+            refresh(); scene3dDirty(); }
+    return;
+  }
   var map={v:'select', w:'wall', r:'room', d:'door', n:'window', m:'dim', t:'text'};
   var k=e.key.toLowerCase();
   if(map[k]) setTool(map[k]);
@@ -1670,6 +2717,7 @@ document.addEventListener('keyup', function(e){ shiftKey=e.shiftKey; });
 /* ============================ الأدوات والأزرار ============================ */
 function setTool(t){
   tool=t; draft=null; hideLenBox();
+  if(t!=='furn' && pendingFurn){ pendingFurn=null; markFurnBtn(); }
   Array.prototype.forEach.call(document.querySelectorAll('button.tool'), function(b){
     b.classList.toggle('on', b.dataset.tool===t);
   });
@@ -1684,13 +2732,15 @@ function delSel(){
   var list = msel.length? msel.slice() : (sel? [{t:sel.t, id:sel.id}] : []);
   if(!list.length){ toast('حدّد عنصراً أولاً — أو اسحب مستطيلاً حول عدة عناصر'); return; }
   pushUndo();
-  var W={}, O={}, T={}, D={};
+  var W={}, O={}, T={}, D={}, F={};
   list.forEach(function(x){
     if(x.t==='wall') W[x.id]=1;
     else if(x.t==='op') O[x.id]=1;
     else if(x.t==='text') T[x.id]=1;
     else if(x.t==='dim') D[x.id]=1;
+    else if(x.t==='furn') F[x.id]=1;
   });
+  doc.furn=(doc.furn||[]).filter(function(f){ return !F[f.id]; });
   doc.walls=doc.walls.filter(function(w){ return !W[w.id]; });
   doc.ops  =doc.ops.filter(function(o){ return !O[o.id] && !W[o.w]; });
   doc.texts=doc.texts.filter(function(t){ return !T[t.id]; });
@@ -1713,7 +2763,8 @@ $('bClear').onclick=function(){
   askConfirm('مسح المخطط', 'سيُحذف كل ما رسمته: الجدران والأبواب والأسماء والصورة المرجعية. يمكنك التراجع بعدها بزر «تراجع».',
     function(){
       pushUndo();
-      doc={walls:[],ops:[],texts:[],dims:[],north:0,rot:0,img:null,seq:1};
+      doc={walls:[],ops:[],texts:[],dims:[],furn:[],wallH:num('wh')||3,
+           north:0,rot:0,img:null,seq:1};
       $('northA').value=0; $('rotA').value=0; imgEl=null; sel=null; msel=[]; refresh();
       toast('تم مسح المخطط');
     }, {icon:'🗑', okText:'نعم، امسح'});
@@ -1735,6 +2786,7 @@ function bbox(){
   function add(p){ any=true; b.x0=Math.min(b.x0,p.x); b.y0=Math.min(b.y0,p.y);
                    b.x1=Math.max(b.x1,p.x); b.y1=Math.max(b.y1,p.y); }
   doc.walls.forEach(function(w){ add(w.a); add(w.b); });
+  (doc.furn||[]).forEach(function(f){ fCorners(f, f.w, f.d).forEach(add); });
   doc.texts.forEach(add);
   doc.dims.forEach(function(d){
     add(d.a); add(d.b);
@@ -1757,7 +2809,46 @@ function fitView(){
 }
 $('bFit').onclick=fitView;
 
-['wt','dw','ww','gs','ortho','snap','dimMode','dimBase','unitMode','showArea'].forEach(function(id){
+/* ============================ قائمة اختيار الأثاث ============================ */
+var pendingFurn=null;
+function markFurnBtn(){
+  Array.prototype.forEach.call(document.querySelectorAll('#furnCats button'), function(b){
+    b.classList.toggle('on', !!pendingFurn && b.dataset.k===pendingFurn);
+  });
+}
+(function buildFurnUI(){
+  var host=$('furnCats'); if(!host) return;
+  var groups=[], seen={};
+  FURN.forEach(function(f){ if(!seen[f.g]){ seen[f.g]=[]; groups.push(f.g); } seen[f.g].push(f); });
+  var h='';
+  groups.forEach(function(g){
+    h+='<div class="fcat">'+esc(g)+'</div><div class="fgrid">';
+    seen[g].forEach(function(f){
+      h+='<button class="act" data-k="'+f.k+'" title="'+esc(f.n+' — '+fmt(f.w)+'×'+fmt(f.d)+' م')+'">'+esc(f.n)+'</button>';
+    });
+    h+='</div>';
+  });
+  host.innerHTML=h;
+  Array.prototype.forEach.call(host.querySelectorAll('button'), function(b){
+    b.onclick=function(){
+      if(pendingFurn===b.dataset.k){ pendingFurn=null; setTool('select'); }
+      else { pendingFurn=b.dataset.k; setTool('furn'); toast('انقر داخل المخطط لوضع: '+furnDef(b.dataset.k).n); }
+      markFurnBtn();
+    };
+  });
+})();
+$('wh').addEventListener('input', function(){
+  var v=pnum($('wh').value);
+  if(!isNaN(v) && v>0.5 && v<12){ doc.wallH=v; scene3dDirty(); }
+});
+$('showFurn').addEventListener('change', function(){
+  var onn=on('showFurn');
+  $('furn2d').style.display = onn? '':'none';
+  if(!onn && pendingFurn){ pendingFurn=null; setTool('select'); markFurnBtn(); }
+  render();
+});
+
+['wt','dw','ww','gs','ortho','snap','dimMode','dimBase','unitMode','showArea','showFurn'].forEach(function(id){
   $(id).addEventListener('change', function(){ roomCache.key=''; render(); });
 });
 ['wt','dw','ww'].forEach(function(id){
@@ -1848,6 +2939,46 @@ function buildProps(){
       render();
     }
     liveField('pTx', applyT); liveField('pS', applyT);
+  }
+  else if(sel.t==='furn'){
+    var f=furnById(sel.id); if(!f){ sel=null; return buildProps(); }
+    var D0=furnDef(f.k);
+    html='<div class="hint" style="margin-bottom:6px">🛋️ <b>'+esc(D0.n)+'</b></div>'+
+         '<div class="row"><label>العرض</label><input type="text" inputmode="decimal" id="fW" value="'+fmt(f.w)+'"><span class="hint">م</span></div>'+
+         '<div class="row"><label>العمق</label><input type="text" inputmode="decimal" id="fD" value="'+fmt(f.d)+'"><span class="hint">م</span></div>'+
+         '<div class="row"><label>الارتفاع</label><input type="text" inputmode="decimal" id="fH" value="'+fmt(f.h)+'"><span class="hint">م</span></div>'+
+         '<div class="row"><label>الزاوية</label><input type="text" inputmode="decimal" id="fA" value="'+Math.round(f.rot||0)+'"><span class="hint">°</span></div>'+
+         '<div class="grid2"><button class="act" id="fL">⟲ 90°</button><button class="act" id="fR">⟳ 90°</button></div>'+
+         '<div class="grid2"><button class="act" id="fSnap">🧲 ألصقه بالجدار</button>'+
+         '<button class="act" id="fDup">⧉ تكرار</button></div>'+
+         '<div class="row"><label>اللون</label><input type="color" id="fC" value="'+(f.c||D0.p[0][6]||'#8a6446')+'">'+
+         '<button class="act" id="fCx" style="margin-inline-start:6px">↺ الأصلي</button></div>'+
+         '<div class="hint">اسحب القطعة لتحريكها · اسحب النقطة الزرقاء لتدويرها · Q و E تدوير 15°</div>';
+    el.innerHTML=html;
+    function applyF(){
+      var a1=pnum($('fW').value); if(!isNaN(a1)&&a1>0.05) f.w=a1;
+      var a2=pnum($('fD').value); if(!isNaN(a2)&&a2>0.05) f.d=a2;
+      var a3=pnum($('fH').value); if(!isNaN(a3)&&a3>0.02) f.h=a3;
+      var a4=pnum($('fA').value); if(!isNaN(a4)) f.rot=a4;
+      render(); scene3dDirty();
+    }
+    ['fW','fD','fH','fA'].forEach(function(id){ liveField(id, applyF); });
+    $('fL').onclick=function(){ pushUndo(); f.rot=(((f.rot||0)-90)%360+360)%360; refresh(); scene3dDirty(); };
+    $('fR').onclick=function(){ pushUndo(); f.rot=(((f.rot||0)+90)%360+360)%360; refresh(); scene3dDirty(); };
+    $('fSnap').onclick=function(){
+      pushUndo();
+      if(snapToWall(f)){ refresh(); scene3dDirty(); toast('تم إلصاقها بالجدار'); }
+      else toast('لا يوجد جدار قريب');
+    };
+    $('fDup').onclick=function(){
+      pushUndo();
+      var cp=JSON.parse(JSON.stringify(f));
+      cp.id=nid(); cp.x+=0.4; cp.y+=0.4;
+      doc.furn.push(cp); sel={t:'furn', id:cp.id}; mselSet(sel);
+      refresh(); scene3dDirty(); toast('تم تكرار القطعة');
+    };
+    $('fC').addEventListener('input', function(){ f.c=$('fC').value; render(); scene3dDirty(); });
+    $('fCx').onclick=function(){ pushUndo(); f.c=null; refresh(); scene3dDirty(); };
   }
   else if(sel.t==='dim'){
     var d=doc.dims.filter(function(x){return x.id===sel.id;})[0];
@@ -2044,6 +3175,8 @@ function loadProject(rec){
     if(!d.doc) throw 0;
     pushUndo();
     doc=d.doc; doc.ops=doc.ops||[]; doc.texts=doc.texts||[]; doc.dims=doc.dims||[];
+      doc.furn=doc.furn||[]; doc.wallH=doc.wallH||3.0;
+      if($('wh')) $('wh').value=fmt(doc.wallH);
     doc.north=doc.north||0; doc.rot=doc.rot||0; doc.img=doc.img||null;
     $('pname').value=d.name||rec.name;
     $('northA').value=doc.north; $('rotA').value=Math.round(doc.rot);
@@ -3018,7 +4151,7 @@ function generatePlan(){
   var nBed=Math.max(1, Math.round(num('gBed'))), nBath=Math.max(1, Math.round(num('gBath')));
   if(W<6||H<6){ toast('الأبعاد صغيرة جداً'); return; }
 
-  doc={walls:[],ops:[],texts:[],dims:[],north:0,rot:0,img:doc.img,seq:1};
+  doc={walls:[],ops:[],texts:[],dims:[],furn:doc.furn||[],wallH:doc.wallH||num('wh')||3,north:0,rot:0,img:doc.img,seq:1};
   $('northA').value=0;
 
   /* ---------- تقسيم المساحة ---------- */
@@ -3814,6 +4947,11 @@ $('bDXF').onclick=function(){
     dxfText('DIMS', {x:(A.x+B.x)/2, y:(A.y+B.y)/2}, 0.2, dimStr(g.L), rot);
   });
   doc.texts.forEach(function(t){ dxfText('TEXT', {x:t.x,y:t.y}, t.s||0.28, t.txt, 0); });
+  if(!$('showFurn') || on('showFurn')) (doc.furn||[]).forEach(function(f){
+    var q=fCorners(f, f.w, f.d);
+    for(var i=0;i<4;i++) dxfLine('FURN', q[i], q[(i+1)%4]);
+    dxfText('FURN', fLocal(f, -f.w/2+0.06, -f.d/2+0.22), 0.16, furnDef(f.k).n, -(f.rot||0));
+  });
   PW(0,'ENDSEC'); PW(0,'EOF');
   dl(new Blob([L.join('\r\n')+'\r\n'],{type:'application/dxf'}), ($('pname').value||'مخطط')+'.dxf');
   toast('تم تصدير DXF');
@@ -3836,6 +4974,8 @@ function openProjectFile(f){
       if(!d.doc) throw 0;
       pushUndo();
       doc=d.doc; doc.ops=doc.ops||[]; doc.texts=doc.texts||[]; doc.dims=doc.dims||[];
+      doc.furn=doc.furn||[]; doc.wallH=doc.wallH||3.0;
+      if($('wh')) $('wh').value=fmt(doc.wallH);
       doc.north=doc.north||0; doc.rot=doc.rot||0; doc.img=doc.img||null;
       $('northA').value=doc.north; $('rotA').value=Math.round(doc.rot);
       if(doc.img){ $('imgW').value=fmt(doc.img.w); $('imgA').value=doc.img.alpha||55; }
@@ -3850,7 +4990,7 @@ $('fileIn').addEventListener('change', function(e){ openProjectFile(e.target.fil
 
 /* ============================ مثال منزل جاهز ============================ */
 function sample(){
-  doc={walls:[],ops:[],texts:[],dims:[],north:0,rot:0,img:doc.img,seq:1};
+  doc={walls:[],ops:[],texts:[],dims:[],furn:doc.furn||[],wallH:doc.wallH||num('wh')||3,north:0,rot:0,img:doc.img,seq:1};
   $('northA').value=0;
   var t=0.20;
   /* الحدود الخارجية 12×9 */

@@ -3313,7 +3313,7 @@ setInterval(function(){
 /* إعدادات الخادم مدمجة في التطبيق — لا تُدخل في كل جهاز */
 var SB_DEF={
   url: 'https://tvbuvwjkojhqcxhyehfs.supabase.co',
-  key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR2YnV2d2prb2pocWN4aHllaGZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MDE4MTUsImV4cCI6MjA5MjI3NzgxNX0.egwryYwKu_Bicl_koaYXaKGBoxz42c6k4VkMD9aZSWQ'
+  key: 'sb_publishable_rySOIJ2uxPvZ8eUKFDzOhw_Ohrm0UcL'
 };
 var SB={url:SB_DEF.url, key:SB_DEF.key, user:'', hash:'', alt:'', on:false};
 
@@ -3382,7 +3382,9 @@ function sbSave(){
 function sbLoad(){
   try{
     var v=JSON.parse(localStorage.getItem('krooki-sb')||'{}');
-    SB.url=v.url||SB_DEF.url; SB.key=v.key||SB_DEF.key;
+    SB.url=v.url||SB_DEF.url;
+    /* مفتاح قديم محفوظ على هذا الجهاز (JWT يبدأ بـ eyJ) يُتجاهَل ويُستعمل المدمج بدله */
+    SB.key=(v.key && v.key.indexOf('eyJ')!==0)? v.key : SB_DEF.key;
     SB.user=v.user||''; SB.hash=v.hash||''; SB.alt=v.alt||'';
     $('sbUrl').value=SB.url; $('sbKey').value=SB.key; $('sbUser').value=SB.user;
     if(!SB.key){
